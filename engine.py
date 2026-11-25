@@ -93,6 +93,12 @@ def legacy_html(soup,pages):
         parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style>'+str(p))
     return '<!doctype html><meta charset=utf-8><style>body{margin:0}div:last-child{break-after:auto}</style>'+''.join(parts)
 
+def unique_svg(svg, page):
+    prefix=f'p{page}_'
+    svg=re.sub(r'\bid="([^"]+)"',lambda m:f'id="{prefix}{m[1]}"',svg)
+    svg=re.sub(r'(href="\#|url\(#)([^"\)]+)',lambda m:m[1]+prefix+m[2],svg)
+    return svg
+
 def convert(kind,src,out):
     if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out); return
     if kind in ('txtpdf','htmlpdf'):
@@ -116,7 +122,11 @@ def convert(kind,src,out):
             im.save(out,format={'jpgpng':'PNG','pngjpg':'JPEG','webp':'WEBP','imgpdf':'PDF'}[kind],**({'quality':95} if kind=='pngjpg' else {'lossless':True} if kind=='webp' else {})); return
     with fitz.open(src) as pdf:
         if pdf.needs_pass or not 1<=len(pdf)<=100: raise ValueError('Encrypted PDF or page limit exceeded (100)')
-        if kind=='pdftxt': out.write_text('\n\f\n'.join('\n'.join(data if typ=='text' else '\n'.join('\t'.join(clean_cell(v or '').replace('\n',' ') for v in row) for row in data.extract()) for _,__,typ,data in page_blocks(p)) for p in pdf),encoding='utf-8'); return
+        if kind=='pdftxt':
+            pages=[p.get_text('text',sort=True) for p in pdf]
+            if any(not t.strip() and p.get_images() for p,t in zip(pdf,pages)):
+                raise ValueError('Image-only page detected; OCR required')
+            out.write_text('\n\f\n'.join(pages),encoding='utf-8'); return
         if kind=='pdfimg':
             with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as z:
                 for i,p in enumerate(pdf): z.writestr(f'page-{i+1:03}.png',p.get_pixmap(matrix=fitz.Matrix(min(2, 2200/max(p.rect.width,p.rect.height)),min(2, 2200/max(p.rect.width,p.rect.height))),alpha=False).tobytes('png'))
@@ -133,7 +143,7 @@ def convert(kind,src,out):
             for i,p in enumerate(pdf):
                 # SVG preserves vector artwork, backgrounds and text positioning.
                 w,h=p.rect.width,p.rect.height
-                parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style><section style="page:cat{i};width:{w}pt;height:{h}pt;break-after:page">'+p.get_svg_image(text_as_path=False)+'</section>')
+                parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style><section style="page:cat{i};width:{w}pt;height:{h}pt;break-after:page">'+unique_svg(p.get_svg_image(text_as_path=False),i)+'</section>')
             out.write_text('<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}svg{display:block;width:100%;height:100%}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
         doc=Document() if kind=='pdfdocx' else None; wb=Workbook() if kind=='pdfxlsx' else None; md=[]
         if wb: wb.remove(wb.active)
@@ -177,10 +187,12 @@ def convert(kind,src,out):
                                 sh=OxmlElement('w:shd'); sh.set(qn('w:fill'),bg); cell._tc.get_or_add_tcPr().append(sh)
                         if wb:
                             c=ws.cell(row+ri,ci+1,v); c.data_type='s'; c.alignment=Alignment(wrap_text=True,vertical='top'); c.border=Border(**{s:Side(style='thin',color='BBBBBB') for s in ('left','right','top','bottom')}); c.font=Font(bold=bold,color=fg); c.fill=PatternFill('solid',fgColor=bg) if bg else PatternFill();
+                            if ci>0 and re.fullmatch(r'RM\s*-?[\d,]+(?:\.\d+)?',v):
+                                c.value=float(v[2:].strip().replace(',','')); c.number_format='"RM" #,##0.00'
                             if ci>0 and re.fullmatch(r'-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?',v) and len(v.replace(',','').replace('.','').replace('-',''))<=15:
                                 header=(data[0][ci] or '').lower();
                                 if re.search(r'qty|quantity|rate|amount|times|weight|factor|\(m\)',header):
-                                    c.value=float(v.replace(',','')) if '.' in v else int(v.replace(',','')); c.number_format='#,##0.00' if '.' in v else '#,##0'
+                                    c.value=float(v.replace(',','')) if '.' in v else int(v.replace(',','')); c.number_format='#,##0.'+'0'*len(v.rsplit('.',1)[1]) if '.' in v else '#,##0'
                     vals=[clean_cell(v or '').replace('|','\\|').replace('\n','<br>') for v in values]; md.append('| '+' | '.join(vals+['']*(n-len(vals)))+' |')
                     if ri==0: md.append('| '+' | '.join(['---']*n)+' |')
                 # Merge only cells whose detected geometry spans adjacent columns.

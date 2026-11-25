@@ -1,5 +1,5 @@
-const VERSION='catpdf-v4.5.4',STATIC=VERSION+'-static',RUNTIME=VERSION+'-runtime';
-const core=['./','./index.html','./manifest.json','./icon.svg','./meow.wav','./stability.js','./smart.js?v=4.5.4','./office-render.js?v=4.5.4','./pptxgen.bundle.js?v=4.5.4','./extraction.js?v=4.5.4','./formula.js?v=4.5.4','./office-tables.js?v=4.5.4','./backend-config.js','./conversion.js?v=4.5.4','./translation-worker.js?v=4.5.4','./unified.js?v=4.5.4'];
+const VERSION='catpdf-v4.5.6',STATIC=VERSION+'-static',RUNTIME=VERSION+'-runtime';
+const core=['./','./index.html','./manifest.json','./icon.svg','./meow.wav','./stability.js','./smart.js?v=4.5.6','./office-render.js?v=4.5.6','./pptxgen.bundle.js?v=4.5.6','./extraction.js?v=4.5.6','./formula.js?v=4.5.6','./office-tables.js?v=4.5.6','./backend-config.js','./conversion.js?v=4.5.6','./translation-worker.js?v=4.5.6','./unified.js?v=4.5.6'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(STATIC).then(c=>c.addAll(core.map(u=>new Request(u,{cache:'reload'}))))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>/^catpdf-v[\d.]+-(static|runtime)$/.test(k)&&k!==STATIC&&k!==RUNTIME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting()});
