@@ -1,3 +1,8 @@
-# CatPDF v4.4 Unified Tools Edition
-19 visible group cards, 44 original tool routes. Original processing panels and handlers retained. Search matches subtools; group selection opens existing panels. Existing favorites/recent storage retained. Service worker cache version updated.
-Static checks: 19 groups, 44 unique mapped tool IDs, all matching panels; JS syntax checked. Browser navigation blocked by environment administrator, so runtime UI, actual conversions, CDN and offline behavior not verified. No new external dependency or API key. New UI uses textContent and fixed internal IDs; full dependency security audit not performed. Existing experimental PowerPoint rendering, Office fidelity and translation performance limitations remain.
+# CatPDF v4.4.1
+- Replace manually assembled PPTX with locally bundled PptxGenJS 4.0.0.
+- First-page aspect ratio; mixed page sizes fitted without stretching.
+- Sequential rendering, bounded canvas resolution and image payload; 20 MB input / 50 pages retained.
+- Validate core XML parts, slide count and slide image/layout relationships before download.
+- Word/Excel to PDF remain text-only; PowerPoint to PDF remains experimental; PDF to Word/Excel remain approximate.
+- Existing unified interface and functions retained; cache version bumped.
+- Benchmark: seven-page supplied PDF rendered with PyMuPDF and packaged using PptxGenJS in Node; python-pptx and LibreOffice opened it. Browser integration and Microsoft PowerPoint not tested. No full dependency vulnerability audit. GitHub inaccessible from development environment.

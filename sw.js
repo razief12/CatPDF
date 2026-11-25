@@ -1,5 +1,5 @@
-const VERSION='catpdf-v4.4.0',STATIC=VERSION+'-static',RUNTIME=VERSION+'-runtime';
-const core=['./','./index.html','./manifest.json','./icon.svg','./meow.wav','./stability.js','./smart.js?v=4.4.0','./office-render.js?v=4.4.0','./conversion.js?v=4.4.0','./translation-worker.js?v=4.4.0','./unified.js?v=4.4.0'];
+const VERSION='catpdf-v4.4.1',STATIC=VERSION+'-static',RUNTIME=VERSION+'-runtime';
+const core=['./','./index.html','./manifest.json','./icon.svg','./meow.wav','./stability.js','./smart.js?v=4.4.1','./office-render.js?v=4.4.1','./pptxgen.bundle.js?v=4.4.1','./conversion.js?v=4.4.1','./translation-worker.js?v=4.4.1','./unified.js?v=4.4.1'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(STATIC).then(c=>c.addAll(core.map(u=>new Request(u,{cache:'reload'}))))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>/^catpdf-v[\d.]+-(static|runtime)$/.test(k)&&k!==STATIC&&k!==RUNTIME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting()});
