@@ -36,7 +36,7 @@
     --glow1:rgba(255,143,171,.22); --glow2:rgba(255,181,167,.22); --glow3:rgba(216,199,255,.18);
   }
   [data-theme="dark"]{
-    --bg:#15102a; --card:#1f1836; --pink:#ff8fab; --pink-soft:#3a2752;
+    --bg:#1e293b; --card:#1f1836; --pink:#ff8fab; --pink-soft:#3a2752;
     --peach:#ffb5a7; --text:#f4ecff; --muted:#a393c9; --line:#342352;
     --shadow:rgba(0,0,0,.6);
     --glow1:rgba(255,143,171,.16); --glow2:rgba(140,100,255,.18); --glow3:rgba(80,60,160,.22);
@@ -185,9 +185,12 @@
   footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px;line-height:1.8;font-weight:600}
   @media(max-width:520px){.hero h1{font-size:28px}.card{padding:20px 16px}.viewer-box{height:420px}.topbar .brand{font-size:18px}.ctrl-btn{padding:8px 11px;font-size:12.5px}.corner-cat{width:48px;height:48px;bottom:14px;right:14px}.update-banner{top:58px;font-size:12px;padding:7px 14px}}
 
-/* v4.0 workspace */
+/* v4.1 workspace */
 .wrap{max-width:1180px}.topbar{padding:14px 0}.hero{display:grid;grid-template-columns:1fr 210px;align-items:center;text-align:left;padding:36px 34px;margin:24px 0;border:1px solid var(--line);border-radius:28px;background:var(--card);box-shadow:0 16px 48px -36px var(--shadow)}
 .hero .mascot-wrap{grid-column:2;grid-row:1/5;justify-self:center}.hero h1{grid-column:1;grid-row:2;font-size:clamp(28px,4vw,48px);margin:8px 0}.hero p{grid-column:1;grid-row:3;margin:0;max-width:580px}.hero .cta{grid-column:1;grid-row:4;justify-self:start}.eyebrow{grid-column:1;grid-row:1;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 12px}.workspace-head h2{font-family:Fredoka,sans-serif;font-size:25px;margin:0}.workspace-head input{max-width:320px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters button[aria-pressed=true]{background:var(--pink-soft);border-color:var(--pink)}.tools{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;scroll-margin-top:90px}.tool-card{align-items:flex-start;text-align:left;padding:16px;min-height:112px;font-size:15px;gap:7px}.tool-card .ti{background:var(--pink-soft);padding:8px;border-radius:12px;font-size:23px}.tool-desc{font-family:Nunito,sans-serif;color:var(--muted);font-size:12px;font-weight:600;line-height:1.4}.tool-card[hidden]{display:none}.card{border-radius:20px}.drop{padding:34px 16px}.drop:focus-within{outline:2px solid var(--pink)}.busy-indicator{display:none;align-items:center;gap:10px;margin:12px 0;color:var(--text);font-size:13px}.panel[data-processing=true] .busy-indicator,.panel[data-loading=true] .busy-indicator{display:flex}.busy-indicator progress{width:100px;accent-color:var(--pink)}.privacy-strip{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0;color:var(--muted);font-size:12px;font-weight:800}.version{font-size:11px;color:var(--muted)}.empty-tools{padding:16px;color:var(--muted)}button:focus-visible{outline:3px solid var(--pink);outline-offset:3px}@media(max-width:850px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.hero{display:flex;flex-direction:column;text-align:center;padding:20px;margin:14px 0}.hero .mascot-wrap{order:-1}.hero .mascot{width:100px;height:100px}.hero .cta{align-self:center}.workspace-head{align-items:stretch;flex-direction:column;gap:8px}.workspace-head input{max-width:none}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tool-card{padding:12px;min-height:105px}.version{display:none}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+[data-theme="dark"]{--bg:#1e293b;--card:#334155;--pink:#f9a8d4;--pink-soft:#475569;--peach:#fbcfe8;--text:#f1f5f9;--muted:#cbd5e1;--line:#64748b;--shadow:#0f172a;--glow1:transparent;--glow2:transparent;--glow3:transparent}
+body{background-image:none}.wrap{max-width:1180px}.topbar{gap:12px}.controls{flex-wrap:wrap;justify-content:flex-end}.controls select{width:auto}.hero{border-radius:24px}.tool-card{min-height:108px;text-align:left;align-items:flex-start;padding:16px;border-width:1px}.tool-card .ti{color:#a21caf}.tool-card .ti svg{width:25px;height:25px;display:block}.tool-card[data-tool="merge"] .ti,.tool-card[data-tool="split"] .ti{color:#be185d}[data-theme="dark"] .tool-card .ti{color:#f9a8d4}.tool-card[hidden]{display:none!important}.tool-desc{color:var(--muted)}.tool-shell{position:relative}.fav-toggle{position:absolute;right:7px;top:7px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:5px 8px}.tool-shell .tool-card{width:100%;height:100%;padding-right:35px}.tool-shell[hidden]{display:none}.quick-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}.quick-row button{border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 13px;border-radius:10px;cursor:pointer}.quick-title{font-weight:800;font-size:15px}.btn:not(.secondary),.hero .cta,.install-btn.show{background:#be185d;color:white}[data-theme="dark"] .btn:not(.secondary),[data-theme="dark"] .hero .cta,[data-theme="dark"] .install-btn.show{background:#f9a8d4;color:#1e293b}.drop.over{box-shadow:0 0 0 5px color-mix(in srgb,var(--pink) 35%,transparent);transform:scale(1.015)}.drop.received{animation:receive .45s ease}.drop.over .ico{animation:receive .6s infinite alternate}@keyframes receive{50%{transform:scale(1.025);border-color:#22c55e}}.busy-indicator::before{content:'🐾';animation:pawPulse .8s infinite alternate}@keyframes pawPulse{to{transform:translateY(-5px);opacity:.4}}.btn:hover:not(:disabled){box-shadow:0 0 0 4px color-mix(in srgb,var(--pink) 35%,transparent)}.btn:active:not(:disabled){animation:tap .25s}@keyframes tap{50%{transform:scale(.96)}}#downloadCelebration{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:16px 24px;box-shadow:0 12px 40px #0004;text-align:center;max-width:90vw}#downloadCelebration:not([hidden]){animation:fade .3s ease}#downloadCelebration .happy{font-size:30px;animation:pawPulse .4s 3 alternate}button:focus-visible,select:focus-visible,.drop:focus-visible{outline:3px solid var(--pink);outline-offset:3px}.extra-drop{margin:12px 0}.extra-form input[type=file]{display:block;max-width:100%;color:var(--text)}@media(max-width:560px){.topbar .brand{font-size:18px}.controls{gap:4px}.controls .ctrl-btn{font-size:11px;padding:6px}.tool-card{padding:12px;min-height:110px}.tool-shell .tool-card{padding-right:28px}.fav-toggle{padding:3px 5px}.wrap{padding-inline:12px}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -212,7 +215,7 @@
     </div>
     <div class="controls">
       <button class="ctrl-btn install-btn" id="installBtn" title="Install CatPDF">📲 <span data-i18n="install.short">Install</span></button>
-      <button class="ctrl-btn" id="themeBtn">🌙</button>
+      <select class="ctrl-btn" id="themeBtn" aria-label="Color theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select><button class="ctrl-btn" id="soundBtn" type="button"></button>
     </div>
   </header>
 
@@ -253,7 +256,7 @@
     <button class="cta" id="heroCta"><span data-i18n="hero.cta"></span> ↓</button>
   </section>
 
-  <div class="workspace-head"><h2 data-i18n="v3.workspace"></h2><input id="toolSearch" type="text" aria-label="Search PDF tools" autocomplete="off"></div>
+  <section id="quickTools" aria-label="Quick access"></section><div class="workspace-head"><h2 data-i18n="v3.workspace"></h2><input id="toolSearch" type="text" aria-label="Search PDF tools" autocomplete="off"></div>
 <div class="filters" id="toolFilters" aria-label="Tool categories"></div>
 <nav class="tools" id="tools">
     <button class="tool-card active" data-tool="view"><span class="ti">👁️</span><span data-i18n="tool.view"></span></button>
@@ -305,7 +308,7 @@
 <section class="panel" id="panel-imgcompress"><div class="card"><h2>Image Compression</h2><p class="hint">Compress an image to JPEG</p><form class="extra-form" data-kind="imgcompress"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="image/*" required><label class="field">JPEG quality (%)</label><input name="quality" type="number" min="10" max="100" value="75" required><label class="field">Maximum width/height (px)</label><input name="max" type="number" min="100" max="4000" value="1600" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
 </main>
 
-  <div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v4.0</span></div><footer>
+  <div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v4.1</span></div><footer>
     <span data-i18n="footer.line1"></span><br>
     <span data-i18n="footer.line2"></span>
   </footer>
@@ -399,21 +402,17 @@ const themeBtn = document.getElementById('themeBtn');
 function updateThemeColor(){
   const isDark = document.documentElement.dataset.theme === 'dark';
   const meta = document.getElementById('themeColorMeta');
-  if (meta) meta.setAttribute('content', isDark ? '#15102a' : '#ff8fab');
+  if (meta) meta.setAttribute('content', isDark ? '#1e293b' : '#ff8fab');
 }
-themeBtn.addEventListener('click', () => {
-  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
-  document.documentElement.dataset.theme = next;
-  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-  updateThemeColor();
-  try { localStorage.setItem('catpdf-theme', next); } catch(e){}
-});
-try {
-  const saved = localStorage.getItem('catpdf-theme');
-  if (saved) { document.documentElement.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀️' : '🌙'; }
-  updateThemeColor();
-} catch(e){}
-
+const mediaTheme=matchMedia('(prefers-color-scheme: dark)');
+function pref(k,d){try{return localStorage.getItem(k)??d}catch{return d}}
+function savePref(k,v){try{localStorage.setItem(k,v)}catch{}}
+function applyTheme(){const v=themeBtn.value;document.documentElement.dataset.theme=v==='system'?(mediaTheme.matches?'dark':'light'):v;updateThemeColor()}
+themeBtn.value=pref('catpdf-theme','system');if(!themeBtn.value)themeBtn.value='system';applyTheme();themeBtn.addEventListener('change',()=>{savePref('catpdf-theme',themeBtn.value);applyTheme()});mediaTheme.addEventListener('change',applyTheme);
+const soundBtn=document.getElementById('soundBtn');let soundOn=pref('catpdf-sound','on')==='on';const meow=new Audio('./meow.wav');meow.preload='auto';
+function soundLabel(){soundBtn.textContent=soundOn?'Sound on':'Sound off';soundBtn.setAttribute('aria-pressed',String(soundOn))}soundLabel();soundBtn.onclick=()=>{soundOn=!soundOn;savePref('catpdf-sound',soundOn?'on':'off');soundLabel();if(soundOn)meow.play().catch(()=>{})};
+// Prime audio during a user gesture for browsers that restrict asynchronous playback.
+document.addEventListener('click',e=>{if(soundOn&&e.target.closest('.panel button')&&!e.target.closest('button:disabled')){meow.load();}},true);
 const $ = s => document.querySelector(s);
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const MAX_FILE = 100 * 1024 * 1024;
@@ -442,6 +441,7 @@ function downloadBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
+  if(soundOn){meow.currentTime=0;meow.play().catch(()=>{});} celebrateDownload();
   setTimeout(() => URL.revokeObjectURL(url), 6000);
 }
 function downloadBytes(bytes, filename) { downloadBlob(new Blob([bytes], { type: 'application/pdf' }), filename); }
@@ -452,7 +452,7 @@ function wireDrop(dropEl, inputEl, onFiles, multiple = false) {
     if (loading || panel.dataset.processing === 'true') return;
     if (files.some(f => f.size > MAX_FILE) || files.reduce((n,f)=>n+f.size,0)>MAX_FILE) return toast('100 MB limit per selection.', 'err');
     loading = true; panel.dataset.loading = 'true';
-    try { await onFiles(files); } catch(e) { console.error(e); toast(t('toast.err'),'err'); }
+    try { dropEl.classList.remove('received'); void dropEl.offsetWidth; dropEl.classList.add('received'); await onFiles(files); } catch(e) { console.error(e); toast(t('toast.err'),'err'); }
     finally { loading = false; delete panel.dataset.loading; }
   };
   dropEl.tabIndex = 0; dropEl.setAttribute('role','button');
@@ -1122,7 +1122,7 @@ if (toolParam) {
 
 applyLang();
 
-// v4.0 UI enhancements; original PDF handlers remain unchanged.
+// v4.1 UI enhancements; original PDF handlers remain unchanged.
 const v3copy={en:{eyebrow:'Your private PDF workspace',workspace:'PDF tools',empty:'No matching tools. Try another search.',private:'🔒 Files stay on your device',offline:'✓ Offline-ready after setup',search:'Search tools…',all:'All tools',organize:'Organize',convert:'Convert',edit:'Edit & optimize',busy:'Processing…'}};
 for(const lang of ['en']) for(const [key,value] of Object.entries(v3copy[lang])) I18N[lang]['v3.'+key]=value;
 const v3tools={view:['organize','Preview a PDF','Pratonton PDF'],merge:['organize','Combine documents','Gabung dokumen'],split:['organize','Extract selected pages','Ekstrak halaman'],img:['convert','Turn images into PDF','Tukar imej kepada PDF'],rotate:['edit','Change page orientation','Putar halaman'],wm:['edit','Stamp a cat watermark','Tambah tera air kucing'],toimg:['convert','Export pages as images','Eksport halaman sebagai imej'],compress:['edit','Optimize PDF file size','Optimumkan saiz PDF'],text:['convert','Extract document text','Ekstrak teks dokumen'],pagenum:['edit','Number your pages','Nomborkan halaman'],organize:['organize','Reorder or delete pages','Susun atau buang halaman']};
@@ -1140,6 +1140,16 @@ function pageSelection(value,n){const result=new Set();for(const part of value.s
 async function extraImage(doc,file){if(!file||!file.size)return null;if(file.size>MAX_FILE)throw Error('Image exceeds 100 MB.');const bytes=await file.arrayBuffer();return file.type==='image/png'?doc.embedPng(bytes):doc.embedJpg(bytes);}
 for(const form of document.querySelectorAll('.extra-form'))form.addEventListener('submit',async e=>{e.preventDefault();const panel=form.closest('.panel');if(panel.dataset.processing)return;const f=new FormData(form), file=f.get('source'), kind=form.dataset.kind, btn=form.querySelector('button');if(!file||!file.size||file.size>MAX_FILE)return toast('Choose a file under 100 MB.','err');panel.dataset.processing='true';btn.disabled=true;try{await new Promise(r=>setTimeout(r,30));const name=file.name.replace(/\.[^.]+$/,'');if(kind==='imgcompress'){const bitmap=await createImageBitmap(file);try{const scale=Math.min(1,Number(f.get('max'))/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',Number(f.get('quality'))/100));if(!blob)throw Error('Image conversion failed.');if(blob.size>=file.size)throw Error('Output is not smaller. Try lower quality or dimensions.');downloadBlob(blob,name+'-compressed.jpg');}finally{bitmap.close();}}else{const {PDFDocument,StandardFonts,rgb}=PDFLib;let doc=await PDFDocument.load(await file.arrayBuffer());const n=doc.getPageCount();if(!n)throw Error('Empty PDF.');if(['delete','extract','duplicate','reverse'].includes(kind)){const selected=kind==='reverse'?null:pageSelection(f.get('pages'),n);let indices=Array.from({length:n},(_,i)=>i);if(kind==='delete')indices=indices.filter(i=>!selected.has(i));if(kind==='extract')indices=indices.filter(i=>selected.has(i));if(kind==='duplicate')indices=indices.flatMap(i=>selected.has(i)?[i,i]:[i]);if(kind==='reverse')indices.reverse();if(!indices.length)throw Error('At least one page must remain.');const output=await PDFDocument.create();for(const i of indices){const [page]=await output.copyPages(doc,[i]);output.addPage(page);}doc=output;}else if(kind==='crop'){for(const page of doc.getPages()){const b=page.getCropBox(), [l,r,t,bot]=['left','right','top','bottom'].map(k=>Number(f.get(k))*72/25.4);if(b.width<=l+r||b.height<=t+bot)throw Error('Margins exceed page size.');page.setCropBox(b.x+l,b.y+bot,b.width-l-r,b.height-t-bot);}}else if(kind==='resize'){const sizes={A4:[595.28,841.89],A3:[841.89,1190.55],Letter:[612,792]};const [w,h]=sizes[f.get('size')];const output=await PDFDocument.create();for(const page of doc.getPages()){const embedded=await output.embedPage(page);const scale=Math.min(w/embedded.width,h/embedded.height);const p=output.addPage([w,h]);p.drawPage(embedded,{x:(w-embedded.width*scale)/2,y:(h-embedded.height*scale)/2,xScale:scale,yScale:scale});}doc=output;}else if(kind==='blank'){const after=Number(f.get('after')), count=Number(f.get('count'));if(after>n)throw Error('Page number exceeds document length.');const p=doc.getPage(Math.max(0,after-1));for(let i=0;i<count;i++)doc.insertPage(after+i,[p.getWidth(),p.getHeight()]);}else if(kind==='metadata'){doc.setTitle(f.get('title'));doc.setAuthor(f.get('author'));doc.setSubject(f.get('subject'));}else if(kind==='sign'||kind==='customwm'){const text=f.get('text').trim(), image=await extraImage(doc,f.get('logo'));if(!text&&!image)throw Error('Enter text or choose an image.');const font=await doc.embedFont(StandardFonts.Helvetica);const opacity=kind==='sign'?1:Number(f.get('opacity'))/100;const index=Number(f.get('page'))-1;if(kind==='sign'&&(index<0||index>=n))throw Error('Invalid page number.');for(const page of kind==='sign'?[doc.getPage(index)]:doc.getPages()){const b=page.getCropBox(),w=b.width,h=b.height;const y=kind==='sign'?b.y+Math.min(40,h/4):b.y+h/2;if(image){const scale=Math.min(w*.35/image.width,h*.15/image.height);page.drawImage(image,{x:kind==='sign'?b.x+w*.55:b.x+(w-image.width*scale)/2,y,width:image.width*scale,height:image.height*scale,opacity});}if(text){const size=Math.min(kind==='sign'?18:48,w*.75/font.widthOfTextAtSize(text,1));page.drawText(text,{x:b.x+(w-font.widthOfTextAtSize(text,size))/2,y:y+(image?Math.min(h*.16,80):0),size,font,opacity,color:rgb(.25,.2,.3)});}}}downloadBytes(await doc.save(),name+'-'+kind+'.pdf');}toast('Done! Your file is ready.','ok');}catch(err){console.error(err);toast(err.message||'Processing failed.','err');}finally{delete panel.dataset.processing;btn.disabled=false;}});
 
+
+// Premium quick access and interaction layer.
+function readList(k){try{const a=JSON.parse(pref(k,'[]'));return Array.isArray(a)?a.filter(x=>v3cards.some(c=>c.dataset.tool===x)):[]}catch{return []}}
+let favs=readList('catpdf-favs'),recent=readList('catpdf-recent');
+const paths=['M4 12h16 M12 4v16','M5 5h9v14H5z M10 2h9v14','M4 5l16 14 M20 5L4 19','M3 4h18v16H3z M3 16l6-6 5 5 3-3 4 4','M20 11a8 8 0 1 1-4-7 M20 3v8h-8','M4 4h16v16H4z M8 8h8v8H8z'];
+function quickRender(){const root=document.getElementById('quickTools');root.replaceChildren();for(const [title,ids] of [['Popular tools',['merge','split','compress','img','sign','organize']],['Favourite tools',favs],['Recently used',recent]]){const h=document.createElement('div');h.className='quick-title';h.textContent=title;const row=document.createElement('div');row.className='quick-row';for(const id of ids){const c=v3cards.find(x=>x.dataset.tool===id);if(!c)continue;const b=document.createElement('button');b.textContent=c.children[1].textContent;b.onclick=()=>{v3category='all';v3search.value='';v3render();c.click();document.getElementById('panel-'+id).scrollIntoView({block:'start',behavior:'smooth'})};row.append(b)}if(!ids.length)row.textContent=title==='Favourite tools'?'Star a tool to save it.':'Your recent tools will appear here.';root.append(h,row)}}
+for(const [i,c] of v3cards.entries()){const id=c.dataset.tool;const shell=document.createElement('div');shell.className='tool-shell';c.before(shell);shell.append(c);const star=document.createElement('button');star.className='fav-toggle';star.type='button';function sync(){star.textContent=favs.includes(id)?'★':'☆';star.setAttribute('aria-pressed',String(favs.includes(id)));star.setAttribute('aria-label','Favourite '+c.children[1].textContent)}sync();star.onclick=()=>{favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];savePref('catpdf-favs',JSON.stringify(favs));sync();quickRender()};shell.append(star);c.addEventListener('click',()=>{recent=[id,...recent.filter(x=>x!==id)].slice(0,6);savePref('catpdf-recent',JSON.stringify(recent));quickRender()});c.querySelector('.ti').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+paths[i%paths.length]+'"/></svg>';new MutationObserver(()=>{shell.hidden=c.hidden}).observe(c,{attributes:true,attributeFilter:['hidden']});shell.hidden=c.hidden}
+quickRender();
+for(const form of document.querySelectorAll('.extra-form')){const input=form.querySelector('input[name="source"]');if(!input)continue;const zone=document.createElement('div');zone.className='drop extra-drop';zone.innerHTML='<span class="ico">🐱</span><strong>Drop your file here</strong><span>or click to select</span>';input.before(zone);zone.tabIndex=0;zone.setAttribute('role','button');zone.onclick=()=>input.click();zone.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}};zone.ondragover=e=>{e.preventDefault();zone.classList.add('over')};zone.ondragleave=()=>zone.classList.remove('over');zone.ondrop=e=>{e.preventDefault();zone.classList.remove('over');if(e.dataTransfer.files.length){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))}};input.addEventListener('change',()=>{zone.querySelector('strong').textContent=input.files[0]?.name||'Drop your file here';zone.classList.remove('received');void zone.offsetWidth;zone.classList.add('received')})}
+const celebration=document.createElement('div');celebration.id='downloadCelebration';celebration.hidden=true;celebration.setAttribute('role','status');celebration.innerHTML='<div class="happy">😻 🐾</div><strong>Purr-fect!</strong><div>Your download has started.</div>';document.body.append(celebration);let celebrationTimer;function celebrateDownload(){celebration.hidden=false;clearTimeout(celebrationTimer);celebrationTimer=setTimeout(()=>celebration.hidden=true,2600)}
 </script>
 </body>
 </html>
