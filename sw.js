@@ -1,5 +1,5 @@
 /* CatPDF Service Worker — offline-first cache */
-const VERSION = 'catpdf-v3.0';
+const VERSION = 'catpdf-v4.0';
 const STATIC_CACHE  = VERSION + '-static';
 const RUNTIME_CACHE = VERSION + '-runtime';
 

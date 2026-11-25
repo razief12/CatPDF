@@ -1,7 +1,7 @@
 {
-  "name": "CatPDF — Cute PDF Tools",
+  "name": "CatPDF \u2014 Cute PDF Tools",
   "short_name": "CatPDF",
-  "description": "11 cute PDF tools in your browser. View, merge, split, rotate, watermark, compress, convert, organize. No uploads. No cats harmed.",
+  "description": "22 private PDF and image tools in your browser.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -10,14 +10,43 @@
   "background_color": "#fff8f4",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["productivity", "utilities", "business"],
+  "categories": [
+    "productivity",
+    "utilities",
+    "business"
+  ],
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Merge PDFs", "short_name": "Merge", "url": "./?tool=merge", "description": "Combine multiple PDFs into one" },
-    { "name": "PDF to Image", "short_name": "To Image", "url": "./?tool=toimg", "description": "Export PDF pages as PNG/JPG" },
-    { "name": "Split PDF", "short_name": "Split", "url": "./?tool=split", "description": "Extract selected pages" }
+    {
+      "name": "Merge PDFs",
+      "short_name": "Merge",
+      "url": "./?tool=merge",
+      "description": "Combine multiple PDFs into one"
+    },
+    {
+      "name": "PDF to Image",
+      "short_name": "To Image",
+      "url": "./?tool=toimg",
+      "description": "Export PDF pages as PNG/JPG"
+    },
+    {
+      "name": "Split PDF",
+      "short_name": "Split",
+      "url": "./?tool=split",
+      "description": "Extract selected pages"
+    }
   ]
 }

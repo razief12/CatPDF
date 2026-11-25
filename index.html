@@ -185,7 +185,7 @@
   footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px;line-height:1.8;font-weight:600}
   @media(max-width:520px){.hero h1{font-size:28px}.card{padding:20px 16px}.viewer-box{height:420px}.topbar .brand{font-size:18px}.ctrl-btn{padding:8px 11px;font-size:12.5px}.corner-cat{width:48px;height:48px;bottom:14px;right:14px}.update-banner{top:58px;font-size:12px;padding:7px 14px}}
 
-/* v3.0 workspace */
+/* v4.0 workspace */
 .wrap{max-width:1180px}.topbar{padding:14px 0}.hero{display:grid;grid-template-columns:1fr 210px;align-items:center;text-align:left;padding:36px 34px;margin:24px 0;border:1px solid var(--line);border-radius:28px;background:var(--card);box-shadow:0 16px 48px -36px var(--shadow)}
 .hero .mascot-wrap{grid-column:2;grid-row:1/5;justify-self:center}.hero h1{grid-column:1;grid-row:2;font-size:clamp(28px,4vw,48px);margin:8px 0}.hero p{grid-column:1;grid-row:3;margin:0;max-width:580px}.hero .cta{grid-column:1;grid-row:4;justify-self:start}.eyebrow{grid-column:1;grid-row:1;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 12px}.workspace-head h2{font-family:Fredoka,sans-serif;font-size:25px;margin:0}.workspace-head input{max-width:320px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters button[aria-pressed=true]{background:var(--pink-soft);border-color:var(--pink)}.tools{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;scroll-margin-top:90px}.tool-card{align-items:flex-start;text-align:left;padding:16px;min-height:112px;font-size:15px;gap:7px}.tool-card .ti{background:var(--pink-soft);padding:8px;border-radius:12px;font-size:23px}.tool-desc{font-family:Nunito,sans-serif;color:var(--muted);font-size:12px;font-weight:600;line-height:1.4}.tool-card[hidden]{display:none}.card{border-radius:20px}.drop{padding:34px 16px}.drop:focus-within{outline:2px solid var(--pink)}.busy-indicator{display:none;align-items:center;gap:10px;margin:12px 0;color:var(--text);font-size:13px}.panel[data-processing=true] .busy-indicator,.panel[data-loading=true] .busy-indicator{display:flex}.busy-indicator progress{width:100px;accent-color:var(--pink)}.privacy-strip{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0;color:var(--muted);font-size:12px;font-weight:800}.version{font-size:11px;color:var(--muted)}.empty-tools{padding:16px;color:var(--muted)}button:focus-visible{outline:3px solid var(--pink);outline-offset:3px}@media(max-width:850px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.hero{display:flex;flex-direction:column;text-align:center;padding:20px;margin:14px 0}.hero .mascot-wrap{order:-1}.hero .mascot{width:100px;height:100px}.hero .cta{align-self:center}.workspace-head{align-items:stretch;flex-direction:column;gap:8px}.workspace-head input{max-width:none}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tool-card{padding:12px;min-height:105px}.version{display:none}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -212,7 +212,6 @@
     </div>
     <div class="controls">
       <button class="ctrl-btn install-btn" id="installBtn" title="Install CatPDF">📲 <span data-i18n="install.short">Install</span></button>
-      <button class="ctrl-btn" id="langBtn">🌐 EN</button>
       <button class="ctrl-btn" id="themeBtn">🌙</button>
     </div>
   </header>
@@ -268,7 +267,18 @@
     <button class="tool-card" data-tool="text"><span class="ti">📝</span><span data-i18n="tool.text"></span></button>
     <button class="tool-card" data-tool="pagenum"><span class="ti">#️⃣</span><span data-i18n="tool.pagenum"></span></button>
     <button class="tool-card" data-tool="organize"><span class="ti">🎨</span><span data-i18n="tool.organize"></span></button>
-  </nav><p id="emptyTools" class="empty-tools" hidden data-i18n="v3.empty"></p>
+  <button class="tool-card" data-tool="delete"><span class="ti">🗑️</span><span>Delete Pages</span></button>
+<button class="tool-card" data-tool="extract"><span class="ti">📑</span><span>Extract Pages</span></button>
+<button class="tool-card" data-tool="duplicate"><span class="ti">📋</span><span>Duplicate Pages</span></button>
+<button class="tool-card" data-tool="reverse"><span class="ti">↕️</span><span>Reverse Pages</span></button>
+<button class="tool-card" data-tool="customwm"><span class="ti">💧</span><span>Custom Watermark</span></button>
+<button class="tool-card" data-tool="crop"><span class="ti">✂️</span><span>Crop PDF</span></button>
+<button class="tool-card" data-tool="resize"><span class="ti">📐</span><span>Resize PDF</span></button>
+<button class="tool-card" data-tool="blank"><span class="ti">➕</span><span>Add Blank Pages</span></button>
+<button class="tool-card" data-tool="sign"><span class="ti">✍️</span><span>Sign PDF</span></button>
+<button class="tool-card" data-tool="metadata"><span class="ti">📝</span><span>Edit Metadata</span></button>
+<button class="tool-card" data-tool="imgcompress"><span class="ti">🖼️</span><span>Image Compression</span></button>
+</nav><p id="emptyTools" class="empty-tools" hidden data-i18n="v3.empty"></p>
 
   <main>
     <section class="panel active" id="panel-view"><div class="card"><h2 data-i18n="view.title"></h2><p class="hint" data-i18n="view.hint"></p><div class="drop" id="dropView"><span class="ico">📂</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="fileView" accept="application/pdf,.pdf"><div class="viewer-box" id="viewerBox"><iframe id="viewerFrame" title="PDF preview"></iframe></div></div></section>
@@ -282,9 +292,20 @@
     <section class="panel" id="panel-text"><div class="card"><h2 data-i18n="text.title"></h2><p class="hint" data-i18n="text.hint"></p><div class="drop" id="dropText"><span class="ico">📝</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="fileText" accept="application/pdf,.pdf"><div class="list" id="textInfo"></div><div id="textForm" style="display:none"><label class="field" data-i18n="text.preview"></label><textarea id="textPreview" readonly placeholder="…"></textarea><button class="btn" id="btnText" data-i18n="btn.text"></button></div></div></section>
     <section class="panel" id="panel-pagenum"><div class="card"><h2 data-i18n="pagenum.title"></h2><p class="hint" data-i18n="pagenum.hint"></p><div class="drop" id="dropPagenum"><span class="ico">#️⃣</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="filePagenum" accept="application/pdf,.pdf"><div class="list" id="pagenumInfo"></div><div id="pagenumForm" style="display:none"><div class="options-row"><div class="opt"><label data-i18n="pagenum.pos"></label><select id="pagenumPos"><option value="bottom-center" data-i18n="pos.bottom-center"></option><option value="bottom-right" data-i18n="pos.bottom-right"></option><option value="bottom-left" data-i18n="pos.bottom-left"></option><option value="top-center" data-i18n="pos.top-center"></option><option value="top-right" data-i18n="pos.top-right"></option><option value="top-left" data-i18n="pos.top-left"></option></select></div><div class="opt"><label data-i18n="pagenum.start"></label><input type="number" id="pagenumStart" min="1" value="1"></div><div class="opt"><label data-i18n="pagenum.size"></label><input type="number" id="pagenumSize" min="6" max="48" value="12"></div></div><button class="btn" id="btnPagenum" data-i18n="btn.pagenum"></button></div></div></section>
     <section class="panel" id="panel-organize"><div class="card"><h2 data-i18n="organize.title"></h2><p class="hint" data-i18n="organize.hint"></p><div class="drop" id="dropOrganize"><span class="ico">🎨</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="fileOrganize" accept="application/pdf,.pdf"><div class="list" id="organizeInfo"></div><div id="organizeForm" style="display:none"><div class="thumb-actions"><span style="font-size:12.5px;color:var(--muted);font-weight:700" data-i18n="organize.tip"></span></div><div class="thumb-grid" id="organizeGrid"></div><button class="btn" id="btnOrganize" data-i18n="btn.organize"></button></div></div></section>
-  </main>
+  <section class="panel" id="panel-delete"><div class="card"><h2>Delete Pages</h2><p class="hint">Remove selected pages</p><form class="extra-form" data-kind="delete"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Pages to delete (e.g. 1,3-5)</label><input name="pages" required placeholder="1,3-5"><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-extract"><div class="card"><h2>Extract Pages</h2><p class="hint">Save selected pages</p><form class="extra-form" data-kind="extract"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Pages to extract (e.g. 1,3-5)</label><input name="pages" required placeholder="1,3-5"><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-duplicate"><div class="card"><h2>Duplicate Pages</h2><p class="hint">Copy selected pages after each original</p><form class="extra-form" data-kind="duplicate"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Pages to duplicate</label><input name="pages" required placeholder="1,3-5"><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-reverse"><div class="card"><h2>Reverse Pages</h2><p class="hint">Reverse page order</p><form class="extra-form" data-kind="reverse"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-customwm"><div class="card"><h2>Custom Watermark</h2><p class="hint">Stamp your own text or logo</p><form class="extra-form" data-kind="customwm"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Watermark text (optional with logo)</label><input name="text" maxlength="100"><label class="field">PNG/JPG logo (optional)</label><input style="display:block" type="file" name="logo" accept="image/png,image/jpeg"><label class="field">Opacity (%)</label><input name="opacity" type="number" min="5" max="100" value="25" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-crop"><div class="card"><h2>Crop PDF</h2><p class="hint">Trim page margins (not secure redaction)</p><form class="extra-form" data-kind="crop"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Left margin (mm)</label><input type="number" name="left" min="0" max="1000" step="0.1" value="0" required><label class="field">Right margin (mm)</label><input type="number" name="right" min="0" max="1000" step="0.1" value="0" required><label class="field">Top margin (mm)</label><input type="number" name="top" min="0" max="1000" step="0.1" value="0" required><label class="field">Bottom margin (mm)</label><input type="number" name="bottom" min="0" max="1000" step="0.1" value="0" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-resize"><div class="card"><h2>Resize PDF</h2><p class="hint">Fit pages to standard paper sizes</p><form class="extra-form" data-kind="resize"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Paper size</label><select name="size"><option>A4</option><option>A3</option><option>Letter</option></select><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-blank"><div class="card"><h2>Add Blank Pages</h2><p class="hint">Insert blank pages after a page</p><form class="extra-form" data-kind="blank"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Insert after page (0 = beginning)</label><input name="after" type="number" min="0" value="0" required><label class="field">Number of blank pages</label><input name="count" type="number" min="1" max="100" value="1" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-sign"><div class="card"><h2>Sign PDF</h2><p class="hint">Add a visual signature, not a digital certificate</p><form class="extra-form" data-kind="sign"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Signature text (or upload image)</label><input name="text" maxlength="100"><label class="field">PNG/JPG signature image</label><input style="display:block" type="file" name="logo" accept="image/png,image/jpeg"><label class="field">Page number</label><input name="page" type="number" min="1" value="1" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-metadata"><div class="card"><h2>Edit Metadata</h2><p class="hint">Update document properties</p><form class="extra-form" data-kind="metadata"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="application/pdf,.pdf" required><label class="field">Title</label><input name="title" maxlength="250"><label class="field">Author</label><input name="author" maxlength="250"><label class="field">Subject</label><input name="subject" maxlength="250"><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+<section class="panel" id="panel-imgcompress"><div class="card"><h2>Image Compression</h2><p class="hint">Compress an image to JPEG</p><form class="extra-form" data-kind="imgcompress"><label class="field">Choose file</label><input style="display:block" type="file" name="source" accept="image/*" required><label class="field">JPEG quality (%)</label><input name="quality" type="number" min="10" max="100" value="75" required><label class="field">Maximum width/height (px)</label><input name="max" type="number" min="100" max="4000" value="1600" required><button class="btn" type="submit">Process &amp; Download</button></form></div></section>
+</main>
 
-  <div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v3.0</span></div><footer>
+  <div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v4.0</span></div><footer>
     <span data-i18n="footer.line1"></span><br>
     <span data-i18n="footer.line2"></span>
   </footer>
@@ -313,7 +334,7 @@
 const I18N = {
   en: {
     'hero.title':'Your PDFs, but <span>cuter</span>.',
-    'hero.sub':'11 tools in one place — view, merge, split, rotate, watermark, compress, convert, organize. Works offline after first visit.',
+    'hero.sub':'22 tools in one place — view, merge, split, rotate, watermark, compress, convert, organize. Works offline after first visit.',
     'hero.cta':'Choose a tool',
     'tool.view':'View','tool.merge':'Merge','tool.split':'Split','tool.img':'Image → PDF',
     'tool.rotate':'Rotate','tool.wm':'Cat Watermark','tool.toimg':'PDF → Image','tool.compress':'Compress',
@@ -359,72 +380,20 @@ const I18N = {
     'toast.installed':'Miaw! CatPDF installed! 🐾',
     'footer.line1':'CatPDF 🐱 · Built with pdf-lib · pdf.js · JSZip',
     'footer.line2':'100% in your browser. Works offline. No uploads. No cats harmed. 🐾'
-  },
-  ms: {
-    'hero.title':'PDF anda, tapi <span>lebih comel</span>.',
-    'hero.sub':'11 alat di satu tempat — lihat, gabung, pisah, putar, tera air, mampat, tukar, susun. Berfungsi luar talian selepas lawatan pertama.',
-    'hero.cta':'Pilih alat',
-    'tool.view':'Lihat','tool.merge':'Gabung','tool.split':'Pisah','tool.img':'Imej → PDF',
-    'tool.rotate':'Putar','tool.wm':'Tera Air Kucing','tool.toimg':'PDF → Imej','tool.compress':'Mampat',
-    'tool.text':'PDF → Teks','tool.pagenum':'Nombor Halaman','tool.organize':'Susun',
-    'install.short':'Pasang','ios.hint':'Ketik butang Kongsi, kemudian "Tambah ke Skrin Utama" untuk pasang CatPDF.',
-    'update.msg':'CatPDF baharu sedia!','update.btn':'Muat Semula',
-    'view.title':'Lihat PDF 🐱','view.hint':'Pilih PDF untuk pratonton di sini. Tiada muat naik.',
-    'merge.title':'Gabung PDF 🔗','merge.hint':'Tambah beberapa PDF, susun semula, kemudian gabungkan.',
-    'split.title':'Pisah / Ekstrak Halaman ✂️','split.hint2':'Klik halaman di bawah untuk pilih. Sesuai untuk ambil bab atau beberapa halaman sahaja.',
-    'img.title':'Imej → PDF 🖼️','img.hint':'Tukar gambar JPG, PNG, WEBP kepada PDF. Setiap gambar jadi satu halaman A4.',
-    'rotate.title':'Putar PDF 🔄','rotate.hint':'Putar semua halaman 90°, 180°, atau 270°.',
-    'wm.title':'Tera Air Kucing 🐾','wm.hint':'Cap tera air CatPDF comel (teks + muka kucing) pada setiap halaman.',
-    'toimg.title':'PDF → Imej 📸','toimg.hint':'Eksport halaman sebagai PNG atau JPG. Muat turun ZIP, atau satu halaman sahaja.',
-    'compress.title':'Mampat PDF 🗜️','compress.hint':'Buang metadata dan aktifkan object stream. Usaha terbaik, tiada kualiti hilang.',
-    'text.title':'PDF → Teks 📝','text.hint':'Ekstrak semua teks dari PDF. Pratonton, kemudian muat turun sebagai .txt.',
-    'pagenum.title':'Tambah Nombor Halaman #️⃣','pagenum.hint':'Cap nombor berturutan pada setiap halaman. Pilih kedudukan, nombor mula, dan saiz.',
-    'organize.title':'Susun Halaman 🎨','organize.hint':'Seret thumbnail untuk susun semula. Klik ✕ untuk buang halaman. Kemudian muat turun PDF baharu.',
-    'drop.title':'Miaw! Lepas fail di sini','drop.single.sub':'atau klik · satu fail .pdf','drop.multi.sub':'atau klik · berbilang fail dibenarkan',
-    'split.label':'Halaman untuk diekstrak','rotate.label':'Sudut putaran','text.preview':'Pratonton teks yang diekstrak',
-    'pagenum.pos':'Kedudukan','pagenum.start':'Nombor mula','pagenum.size':'Saiz fon',
-    'pos.bottom-center':'Bawah tengah','pos.bottom-right':'Bawah kanan','pos.bottom-left':'Bawah kiri',
-    'pos.top-center':'Atas tengah','pos.top-right':'Atas kanan','pos.top-left':'Atas kiri',
-    'organize.tip':'Seret untuk susun · Klik ✕ untuk buang · Susunan dipaparkan = output akhir',
-    'toimg.format':'Format','toimg.scale':'Resolusi','toimg.quality':'Kualiti JPG','toimg.pagenum':'Nombor halaman (untuk muat turun tunggal)',
-    'btn.merge':'🐾 Gabung & Muat Turun','btn.split':'🐾 Ekstrak Yang Dipilih',
-    'btn.img':'🐾 Tukar & Muat Turun','btn.rotate':'🐾 Putar & Muat Turun',
-    'btn.wm':'🐾 Tera Air Kucing','btn.toimg.zip':'📦 Muat Turun Semua ZIP',
-    'btn.toimg.single':'🖼️ Muat Turun Halaman','btn.compress':'🐾 Mampat & Muat Turun',
-    'btn.text':'📝 Muat Turun .txt','btn.pagenum':'🐾 Tambah Nombor & Muat Turun',
-    'btn.organize':'🎨 Guna & Muat Turun','btn.selectall':'Pilih semua','btn.clear':'Kosongkan',
-    'unit.pages':'hlm',
-    'toast.ok':'Miaw! Siap 🐾','toast.err':'Alamak! Ada masalah.',
-    'toast.notpdf':'Sila pilih fail PDF yang sah.','toast.nopdf':'Tiada fail PDF dikesan.','toast.noimg':'Tiada fail imej dikesan.',
-    'toast.addedFiles':'Miaw! {n} fail ditambah 🐾','toast.addedImgs':'Miaw! {n} gambar ditambah 🐾',
-    'toast.loaded':'Miaw! Dimuatkan — {n} halaman 🐾','toast.merged':'Miaw! Digabung jadi {n} halaman 🐾',
-    'toast.extracted':'Miaw! {n} halaman diekstrak 🐾','toast.converted':'Miaw! {n} gambar ditukar 🐾',
-    'toast.rotated':'Miaw! Halaman diputar 🐾','toast.watermarked':'Miaw! Tera air kucing digunakan 🐾',
-    'toast.zipReady':'Miaw! ZIP sedia ({n} halaman) 🐾','toast.singlePage':'Miaw! Halaman {n} dieksport 🐾',
-    'toast.compressed':'Miaw! {before} → {after} 🐾','toast.textReady':'Miaw! Teks diekstrak — {n} aksara 🐾',
-    'toast.pagenumDone':'Miaw! Nombor halaman ditambah 🐾','toast.organizeDone':'Miaw! PDF baharu sedia — {n} halaman 🐾',
-    'toast.noPages':'Tiada halaman sah dipilih.','toast.needFile':'Sila pilih PDF dahulu.',
-    'toast.badPage':'Nombor halaman tidak sah.','toast.noSelection':'Sila pilih sekurang-kurangnya satu halaman.',
-    'toast.installed':'Miaw! CatPDF dipasang! 🐾',
-    'footer.line1':'CatPDF 🐱 · Dibina dengan pdf-lib · pdf.js · JSZip',
-    'footer.line2':'100% dalam pelayar anda. Berfungsi luar talian. Tiada muat naik. Tiada kucing dicederakan. 🐾'
   }
 };
-let LANG = (navigator.language || 'en').toLowerCase().startsWith('ms') ? 'ms' : 'en';
+const LANG = 'en';
 function t(k){ return (I18N[LANG][k] ?? I18N.en[k] ?? k); }
 function tf(k, vars){ return t(k).replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? ''); }
 function applyLang(){
   document.documentElement.dataset.lang = LANG;
   document.documentElement.lang = LANG;
   document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
-  document.getElementById('langBtn').textContent = LANG.toUpperCase();
   renderMergeList(); renderImgList(); renderSplitInfo(); renderRotateInfo();
   renderWmInfo(); renderToimgInfo(); renderCompressInfo(); renderTextInfo();
   renderPagenumInfo(); renderOrganizeInfo(); updateSplitCount();
 }
-document.getElementById('langBtn').addEventListener('click', () => {
-  LANG = LANG === 'en' ? 'ms' : 'en'; applyLang();
-});
+
 
 const themeBtn = document.getElementById('themeBtn');
 function updateThemeColor(){
@@ -481,7 +450,7 @@ function wireDrop(dropEl, inputEl, onFiles, multiple = false) {
   let loading = false;
   const accept = async files => {
     if (loading || panel.dataset.processing === 'true') return;
-    if (files.some(f => f.size > MAX_FILE) || files.reduce((n,f)=>n+f.size,0)>MAX_FILE) return toast(LANG === 'ms' ? 'Had fail 100 MB setiap pilihan.' : '100 MB limit per selection.', 'err');
+    if (files.some(f => f.size > MAX_FILE) || files.reduce((n,f)=>n+f.size,0)>MAX_FILE) return toast('100 MB limit per selection.', 'err');
     loading = true; panel.dataset.loading = 'true';
     try { await onFiles(files); } catch(e) { console.error(e); toast(t('toast.err'),'err'); }
     finally { loading = false; delete panel.dataset.loading; }
@@ -950,7 +919,7 @@ $('#btnCompress').addEventListener('click', async () => {
     doc.setKeywords([]); doc.setProducer('CatPDF'); doc.setCreator('CatPDF');
     const bytes = await doc.save({ useObjectStreams: true });
     const baseName = compressFile.name.replace(/\.pdf$/i, '');
-    if (bytes.byteLength >= orig) return toast(LANG === 'ms' ? 'Fail asal sudah lebih kecil. Tiada perubahan.' : 'Original is already smaller. No changes made.');
+    if (bytes.byteLength >= orig) return toast('Original is already smaller. No changes made.');
     downloadBytes(bytes, `${baseName}-compressed.pdf`);
     toast(tf('toast.compressed', { before: fmtSize(orig), after: fmtSize(bytes.byteLength) }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
@@ -1153,18 +1122,24 @@ if (toolParam) {
 
 applyLang();
 
-// v3.0 UI enhancements; original PDF handlers remain unchanged.
-const v3copy={en:{eyebrow:'Your private PDF workspace',workspace:'PDF tools',empty:'No matching tools. Try another search.',private:'🔒 Files stay on your device',offline:'✓ Offline-ready after setup',search:'Search tools…',all:'All tools',organize:'Organize',convert:'Convert',edit:'Edit & optimize',busy:'Processing…'},ms:{eyebrow:'Ruang kerja PDF peribadi anda',workspace:'Alat PDF',empty:'Tiada alat sepadan. Cuba carian lain.',private:'🔒 Fail kekal pada peranti anda',offline:'✓ Sedia luar talian selepas persediaan',search:'Cari alat…',all:'Semua alat',organize:'Susun',convert:'Tukar',edit:'Edit & optimum',busy:'Sedang diproses…'}};
-for(const lang of ['en','ms']) for(const [key,value] of Object.entries(v3copy[lang])) I18N[lang]['v3.'+key]=value;
+// v4.0 UI enhancements; original PDF handlers remain unchanged.
+const v3copy={en:{eyebrow:'Your private PDF workspace',workspace:'PDF tools',empty:'No matching tools. Try another search.',private:'🔒 Files stay on your device',offline:'✓ Offline-ready after setup',search:'Search tools…',all:'All tools',organize:'Organize',convert:'Convert',edit:'Edit & optimize',busy:'Processing…'}};
+for(const lang of ['en']) for(const [key,value] of Object.entries(v3copy[lang])) I18N[lang]['v3.'+key]=value;
 const v3tools={view:['organize','Preview a PDF','Pratonton PDF'],merge:['organize','Combine documents','Gabung dokumen'],split:['organize','Extract selected pages','Ekstrak halaman'],img:['convert','Turn images into PDF','Tukar imej kepada PDF'],rotate:['edit','Change page orientation','Putar halaman'],wm:['edit','Stamp a cat watermark','Tambah tera air kucing'],toimg:['convert','Export pages as images','Eksport halaman sebagai imej'],compress:['edit','Optimize PDF file size','Optimumkan saiz PDF'],text:['convert','Extract document text','Ekstrak teks dokumen'],pagenum:['edit','Number your pages','Nomborkan halaman'],organize:['organize','Reorder or delete pages','Susun atau buang halaman']};
+Object.assign(v3tools,{"delete": ["organize", "Remove selected pages"], "extract": ["organize", "Save selected pages"], "duplicate": ["organize", "Copy selected pages after each original"], "reverse": ["organize", "Reverse page order"], "customwm": ["edit", "Stamp your own text or logo"], "crop": ["edit", "Trim page margins (not secure redaction)"], "resize": ["edit", "Fit pages to standard paper sizes"], "blank": ["organize", "Insert blank pages after a page"], "sign": ["edit", "Add a visual signature, not a digital certificate"], "metadata": ["edit", "Update document properties"], "imgcompress": ["convert", "Compress an image to JPEG"]});
 let v3category='all';
 const v3search=document.getElementById('toolSearch');
 const v3cards=[...document.querySelectorAll('.tool-card')];
 for(const card of v3cards){const desc=document.createElement('span');desc.className='tool-desc';card.append(desc);}
 for(const panel of document.querySelectorAll('.panel')){const busy=document.createElement('div');busy.className='busy-indicator';busy.setAttribute('role','status');const progress=document.createElement('progress');progress.setAttribute('aria-label','Processing');const label=document.createElement('span');label.dataset.i18n='v3.busy';busy.append(progress,label);panel.querySelector('.card').append(busy);}
-function v3filter(){const q=v3search.value.trim().toLowerCase();let count=0;for(const card of v3cards){const info=v3tools[card.dataset.tool];const hay=[card.textContent,I18N.en['tool.'+card.dataset.tool],I18N.ms['tool.'+card.dataset.tool],...info].join(' ').toLowerCase();card.hidden=!( (v3category==='all'||info[0]===v3category)&&hay.includes(q));if(!card.hidden)count++;}document.getElementById('emptyTools').hidden=count!==0;}
-function v3render(){v3search.placeholder=t('v3.search');v3search.setAttribute('aria-label',t('v3.search'));const filters=document.getElementById('toolFilters');filters.replaceChildren();for(const cat of ['all','organize','convert','edit']){const b=document.createElement('button');b.type='button';b.className='ctrl-btn';b.textContent=t('v3.'+cat);b.setAttribute('aria-pressed',String(cat===v3category));b.addEventListener('click',()=>{v3category=cat;v3render();});filters.append(b);}for(const card of v3cards)card.querySelector('.tool-desc').textContent=v3tools[card.dataset.tool][LANG==='ms'?2:1];document.querySelectorAll('[data-i18n^="v3."]').forEach(el=>el.textContent=t(el.dataset.i18n));v3filter();}
-v3search.addEventListener('input',v3filter);document.getElementById('langBtn').addEventListener('click',v3render);v3render();
+function v3filter(){const q=v3search.value.trim().toLowerCase();let count=0;for(const card of v3cards){const info=v3tools[card.dataset.tool];const hay=[card.textContent,I18N.en['tool.'+card.dataset.tool],...info].join(' ').toLowerCase();card.hidden=!( (v3category==='all'||info[0]===v3category)&&hay.includes(q));if(!card.hidden)count++;}document.getElementById('emptyTools').hidden=count!==0;}
+function v3render(){v3search.placeholder=t('v3.search');v3search.setAttribute('aria-label',t('v3.search'));const filters=document.getElementById('toolFilters');filters.replaceChildren();for(const cat of ['all','organize','convert','edit']){const b=document.createElement('button');b.type='button';b.className='ctrl-btn';b.textContent=t('v3.'+cat);b.setAttribute('aria-pressed',String(cat===v3category));b.addEventListener('click',()=>{v3category=cat;v3render();});filters.append(b);}for(const card of v3cards)card.querySelector('.tool-desc').textContent=v3tools[card.dataset.tool][1];document.querySelectorAll('[data-i18n^="v3."]').forEach(el=>el.textContent=t(el.dataset.i18n));v3filter();}
+v3search.addEventListener('input',v3filter);v3render();
+
+function pageSelection(value,n){const result=new Set();for(const part of value.split(',')){const m=part.trim().match(/^(\d+)(?:\s*-\s*(\d+))?$/);if(!m)throw Error('Enter page numbers or ranges.');const a=Number(m[1]),b=Number(m[2]||m[1]);if(a<1||b<a||b>n)throw Error('Page range is outside the document.');for(let i=a;i<=b;i++)result.add(i-1);}return result;}
+async function extraImage(doc,file){if(!file||!file.size)return null;if(file.size>MAX_FILE)throw Error('Image exceeds 100 MB.');const bytes=await file.arrayBuffer();return file.type==='image/png'?doc.embedPng(bytes):doc.embedJpg(bytes);}
+for(const form of document.querySelectorAll('.extra-form'))form.addEventListener('submit',async e=>{e.preventDefault();const panel=form.closest('.panel');if(panel.dataset.processing)return;const f=new FormData(form), file=f.get('source'), kind=form.dataset.kind, btn=form.querySelector('button');if(!file||!file.size||file.size>MAX_FILE)return toast('Choose a file under 100 MB.','err');panel.dataset.processing='true';btn.disabled=true;try{await new Promise(r=>setTimeout(r,30));const name=file.name.replace(/\.[^.]+$/,'');if(kind==='imgcompress'){const bitmap=await createImageBitmap(file);try{const scale=Math.min(1,Number(f.get('max'))/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',Number(f.get('quality'))/100));if(!blob)throw Error('Image conversion failed.');if(blob.size>=file.size)throw Error('Output is not smaller. Try lower quality or dimensions.');downloadBlob(blob,name+'-compressed.jpg');}finally{bitmap.close();}}else{const {PDFDocument,StandardFonts,rgb}=PDFLib;let doc=await PDFDocument.load(await file.arrayBuffer());const n=doc.getPageCount();if(!n)throw Error('Empty PDF.');if(['delete','extract','duplicate','reverse'].includes(kind)){const selected=kind==='reverse'?null:pageSelection(f.get('pages'),n);let indices=Array.from({length:n},(_,i)=>i);if(kind==='delete')indices=indices.filter(i=>!selected.has(i));if(kind==='extract')indices=indices.filter(i=>selected.has(i));if(kind==='duplicate')indices=indices.flatMap(i=>selected.has(i)?[i,i]:[i]);if(kind==='reverse')indices.reverse();if(!indices.length)throw Error('At least one page must remain.');const output=await PDFDocument.create();for(const i of indices){const [page]=await output.copyPages(doc,[i]);output.addPage(page);}doc=output;}else if(kind==='crop'){for(const page of doc.getPages()){const b=page.getCropBox(), [l,r,t,bot]=['left','right','top','bottom'].map(k=>Number(f.get(k))*72/25.4);if(b.width<=l+r||b.height<=t+bot)throw Error('Margins exceed page size.');page.setCropBox(b.x+l,b.y+bot,b.width-l-r,b.height-t-bot);}}else if(kind==='resize'){const sizes={A4:[595.28,841.89],A3:[841.89,1190.55],Letter:[612,792]};const [w,h]=sizes[f.get('size')];const output=await PDFDocument.create();for(const page of doc.getPages()){const embedded=await output.embedPage(page);const scale=Math.min(w/embedded.width,h/embedded.height);const p=output.addPage([w,h]);p.drawPage(embedded,{x:(w-embedded.width*scale)/2,y:(h-embedded.height*scale)/2,xScale:scale,yScale:scale});}doc=output;}else if(kind==='blank'){const after=Number(f.get('after')), count=Number(f.get('count'));if(after>n)throw Error('Page number exceeds document length.');const p=doc.getPage(Math.max(0,after-1));for(let i=0;i<count;i++)doc.insertPage(after+i,[p.getWidth(),p.getHeight()]);}else if(kind==='metadata'){doc.setTitle(f.get('title'));doc.setAuthor(f.get('author'));doc.setSubject(f.get('subject'));}else if(kind==='sign'||kind==='customwm'){const text=f.get('text').trim(), image=await extraImage(doc,f.get('logo'));if(!text&&!image)throw Error('Enter text or choose an image.');const font=await doc.embedFont(StandardFonts.Helvetica);const opacity=kind==='sign'?1:Number(f.get('opacity'))/100;const index=Number(f.get('page'))-1;if(kind==='sign'&&(index<0||index>=n))throw Error('Invalid page number.');for(const page of kind==='sign'?[doc.getPage(index)]:doc.getPages()){const b=page.getCropBox(),w=b.width,h=b.height;const y=kind==='sign'?b.y+Math.min(40,h/4):b.y+h/2;if(image){const scale=Math.min(w*.35/image.width,h*.15/image.height);page.drawImage(image,{x:kind==='sign'?b.x+w*.55:b.x+(w-image.width*scale)/2,y,width:image.width*scale,height:image.height*scale,opacity});}if(text){const size=Math.min(kind==='sign'?18:48,w*.75/font.widthOfTextAtSize(text,1));page.drawText(text,{x:b.x+(w-font.widthOfTextAtSize(text,size))/2,y:y+(image?Math.min(h*.16,80):0),size,font,opacity,color:rgb(.25,.2,.3)});}}}downloadBytes(await doc.save(),name+'-'+kind+'.pdf');}toast('Done! Your file is ready.','ok');}catch(err){console.error(err);toast(err.message||'Processing failed.','err');}finally{delete panel.dataset.processing;btn.disabled=false;}});
+
 </script>
 </body>
 </html>
