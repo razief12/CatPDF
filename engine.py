@@ -4,6 +4,7 @@ import fitz
 from PIL import Image, ImageOps
 from docx import Document
 from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
 from docx.oxml import OxmlElement
@@ -14,7 +15,7 @@ from pptx import Presentation
 from pptx.util import Inches as PI
 from weasyprint import HTML
 
-KINDS={'pdfdocx':'docx','pdfxlsx':'xlsx','pdfpptx':'pptx','pdfimg':'zip','pdftxt':'txt','pdfhtml':'html','pdfmd':'md','docxpdf':'pdf','xlsxpdf':'pdf','pptxpdf':'pdf','imgpdf':'pdf','txtpdf':'pdf','htmlpdf':'pdf','jpgpng':'png','pngjpg':'jpg','webp':'webp'}
+KINDS={'pdfdocx':'docx','pdfxlsx':'xlsx','pdfpptx':'pptx','pdfimg':'zip','pdftxt':'txt','pdfhtml':'html','pdfsemantic':'html','pdfmd':'md','docxpdf':'pdf','xlsxpdf':'pdf','pptxpdf':'pdf','imgpdf':'pdf','txtpdf':'pdf','htmlpdf':'pdf','jpgpng':'png','pngjpg':'jpg','webp':'webp'}
 Image.MAX_IMAGE_PIXELS=20_000_000
 warnings.simplefilter("error", Image.DecompressionBombWarning)
 
@@ -27,6 +28,13 @@ def prepare_excel_layout(src):
     try:
         for ws in wb.worksheets:
             if ws.sheet_state != 'visible':
+                continue
+            for row in ws.iter_rows():
+                for cell in row:
+                    # Quote literal RM for Calc compatibility; leave other formats intact.
+                    if cell.number_format.startswith("RM "):
+                        cell.number_format = '"RM" ' + cell.number_format[3:]
+            if ws.page_setup.orientation or ws.page_setup.scale or ws.page_setup.fitToWidth is not None:
                 continue
             ws.sheet_properties.pageSetUpPr.fitToPage = True
             ws.page_setup.scale = None
@@ -138,6 +146,20 @@ def convert(kind,src,out):
             deck.save(out); return
         if any(not p.get_text().strip() and p.get_images() for p in pdf): raise ValueError('Image-only page detected; OCR required to avoid silent data loss')
         if not any(p.get_text().strip() for p in pdf): raise ValueError('No selectable text; OCR required')
+        if kind=='pdfsemantic':
+            parts=[]
+            for i,p in enumerate(pdf):
+                parts.append(f'<section><h2>Page {i+1}</h2>')
+                for _,__,typ,data in page_blocks(p):
+                    if typ=='text':
+                        parts.append('<p>'+html.escape(data).replace('\n','<br>')+'</p>'); continue
+                    parts.append('<table><tbody>')
+                    for ri,row in enumerate(data.extract()):
+                        tag='th' if ri==0 else 'td'
+                        parts.append('<tr>'+''.join(f'<{tag}>'+html.escape(clean_cell(v or '')).replace('\n','<br>')+f'</{tag}>' for v in row)+'</tr>')
+                    parts.append('</tbody></table>')
+                parts.append('</section>')
+            out.write_text('<!doctype html><html><head><meta charset="utf-8"><title>Editable PDF export</title><style>body{font:14px sans-serif;margin:24px}table{border-collapse:collapse;margin:12px 0;max-width:100%}td,th{border:1px solid #aaa;padding:5px;text-align:left}th{background:#e6edf7}section{break-after:page}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
         if kind=='pdfhtml':
             parts=[]
             for i,p in enumerate(pdf):
@@ -181,8 +203,17 @@ def convert(kind,src,out):
                             cell=table.cell(ri,ci); cell.text=v
                             for para in cell.paragraphs:
                                 para.paragraph_format.space_after=Pt(0)
+                                rect=t.rows[ri].cells[ci]
+                                spans=[sp for sp in allspans if rect and fitz.Rect(rect).contains(fitz.Point((sp['bbox'][0]+sp['bbox'][2])/2,(sp['bbox'][1]+sp['bbox'][3])/2))]
+                                dominant=max(spans,key=lambda sp:len(sp['text']),default={})
+                                if dominant and rect:
+                                    left=min(sp['bbox'][0] for sp in spans)-rect[0]; right=rect[2]-max(sp['bbox'][2] for sp in spans)
+                                    if abs(left-right)<3 and left>3: para.alignment=WD_ALIGN_PARAGRAPH.CENTER
+                                    elif right<left and right<8: para.alignment=WD_ALIGN_PARAGRAPH.RIGHT
+                                para.paragraph_format.space_before=Pt(0)
+                                para.paragraph_format.line_spacing=1.0
                                 for run in para.runs:
-                                    run.font.size=Pt(8); run.bold=bold; run.font.color.rgb=RGBColor.from_string(fg)
+                                    run.font.size=Pt(dominant.get('size',8)); run.bold=bold; run.font.color.rgb=RGBColor.from_string(fg)
                             if bg:
                                 sh=OxmlElement('w:shd'); sh.set(qn('w:fill'),bg); cell._tc.get_or_add_tcPr().append(sh)
                         if wb:

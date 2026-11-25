@@ -1,5 +1,2 @@
-# CatPDF v4.5.6 preview
-Backend: full text extraction, unique SVG IDs, currency and decimal formatting in PDF to Excel.
-Frontend: remove 16 MP source image limit, retain output canvas limits, preserve text line breaks, cache version bump.
-Local tests: BQ text character multiset matched; backend rendered all 3 image PDF pages; SVG IDs unique; XLSX generated. Browser and deployed backend not tested.
-Remaining: Excel to PDF currency, Word layout, image compression, semantic HTML, regression tests.
+# CatPDF v4.5.6 RC1 (build 4.5.6.1)
+Includes preview fixes. Adds Excel literal RM format normalization and respects explicit print settings; PDF-to-Word alignment and font-size heuristics; Image-to-PDF quality selector (lossy JPEG in non-original modes); server-side editable HTML mode. Editable HTML reconstructs text/tables, not graphics or exact merged cells. Preserve Layout remains default. Local syntax checks passed; BQ semantic HTML contains seven tables and grand total; DOCX generated; Excel PDF contains formatted total 541,202.12. Browser, deployed server, full layout and regression tests pending. Word-to-PDF continues using LibreOffice; exact font fidelity not guaranteed.
