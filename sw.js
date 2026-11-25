@@ -1,5 +1,5 @@
 /* CatPDF Service Worker — offline-first cache */
-const VERSION = 'catpdf-v4.1.2';
+const VERSION = 'catpdf-v4.1.3';
 const STATIC_CACHE  = VERSION + '-static';
 const RUNTIME_CACHE = VERSION + '-runtime';
 
@@ -47,16 +47,16 @@ self.addEventListener('fetch', (event) => {
   if (sameOrigin && !url.href.startsWith(self.registration.scope)) return;
   if (!sameOrigin && !knownCdn) return;
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(() => caches.open(STATIC_CACHE).then(c => c.match('./index.html'))));
+    event.respondWith(fetch(request).then(r=>{if(!r.ok)throw Error('Navigation failed');return r}).catch(() => caches.open(STATIC_CACHE).then(c => c.match('./index.html'))));
     return;
   }
   event.respondWith(
-    caches.match(request).then(cached => {
+    caches.open(STATIC_CACHE).then(c=>c.match(request)).then(cached=>cached||caches.open(RUNTIME_CACHE).then(c=>c.match(request))).then(cached => {
       if (cached) return cached;
-      return fetch(request).then(response => {
+      return fetch(request).then(async response => {
         if (response && response.status === 200) {
           const clone = response.clone();
-          caches.open(RUNTIME_CACHE).then(c => c.put(request, clone)).catch(() => {});
+          if (PRECACHE_URLS.some(p=>new URL(p,self.registration.scope).href===url.href)||url.hostname==='fonts.gstatic.com') await caches.open(RUNTIME_CACHE).then(c => c.put(request, clone)).catch(() => {});
         }
         return response;
       }).catch(() => {
