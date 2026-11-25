@@ -614,13 +614,24 @@ document.addEventListener('click', e => {
     e.preventDefault(); e.stopImmediatePropagation();
   }
 }, true);
+let toolScrollFrame = 0;
+function scrollToActiveTool(id) {
+  cancelAnimationFrame(toolScrollFrame);
+  toolScrollFrame = requestAnimationFrame(() => {
+    const panel = document.getElementById('panel-' + id);
+    if (!panel || !panel.classList.contains('active')) return;
+    const header = document.querySelector('.topbar');
+    const offset = header ? header.getBoundingClientRect().height + 12 : 12;
+    window.scrollTo({top: Math.max(0, panel.getBoundingClientRect().top + window.scrollY - offset), behavior: 'instant'});
+  });
+}
 document.querySelectorAll('.tool-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     card.classList.add('active');
     $('#panel-' + card.dataset.tool).classList.add('active');
-    document.getElementById('tools').scrollIntoView({ behavior:'smooth', block:'start' });
+    scrollToActiveTool(card.dataset.tool);
   });
 });
 $('#heroCta').addEventListener('click', () => {
@@ -1209,20 +1220,20 @@ for(const form of document.querySelectorAll('.extra-form'))form.addEventListener
 function readList(k){try{const a=JSON.parse(pref(k,'[]'));return Array.isArray(a)?a.filter(x=>v3cards.some(c=>c.dataset.tool===x)):[]}catch{return []}}
 let favs=readList('catpdf-favs'),recent=readList('catpdf-recent');
 const paths=['M4 12h16 M12 4v16','M5 5h9v14H5z M10 2h9v14','M4 5l16 14 M20 5L4 19','M3 4h18v16H3z M3 16l6-6 5 5 3-3 4 4','M20 11a8 8 0 1 1-4-7 M20 3v8h-8','M4 4h16v16H4z M8 8h8v8H8z'];
-function quickRender(){const root=document.getElementById('quickTools');root.replaceChildren();for(const [title,ids] of [['Popular tools',['merge','split','compress','img','sign','organize']],['Favourite tools',favs],['Recently used',recent]]){const h=document.createElement('div');h.className='quick-title';h.textContent=title;const row=document.createElement('div');row.className='quick-row';for(const id of ids){const c=v3cards.find(x=>x.dataset.tool===id);if(!c)continue;const b=document.createElement('button');b.textContent=c.children[1].textContent;b.onclick=()=>{v3category='all';v3search.value='';v3render();c.click();document.getElementById('panel-'+id).scrollIntoView({block:'start',behavior:'smooth'})};row.append(b)}if(!ids.length)row.textContent=title==='Favourite tools'?'Star a tool to save it.':'Your recent tools will appear here.';root.append(h,row)}}
+function quickRender(){const root=document.getElementById('quickTools');root.replaceChildren();for(const [title,ids] of [['Popular tools',['merge','split','compress','img','sign','organize']],['Favourite tools',favs],['Recently used',recent]]){const h=document.createElement('div');h.className='quick-title';h.textContent=title;const row=document.createElement('div');row.className='quick-row';for(const id of ids){const c=v3cards.find(x=>x.dataset.tool===id);if(!c)continue;const b=document.createElement('button');b.textContent=c.children[1].textContent;b.onclick=()=>{v3category='all';v3search.value='';v3render();c.click()};row.append(b)}if(!ids.length)row.textContent=title==='Favourite tools'?'Star a tool to save it.':'Your recent tools will appear here.';root.append(h,row)}}
 for(const [i,c] of v3cards.entries()){const id=c.dataset.tool;const shell=document.createElement('div');shell.className='tool-shell';c.before(shell);shell.append(c);const star=document.createElement('button');star.className='fav-toggle';star.type='button';function sync(){star.textContent=favs.includes(id)?'★':'☆';star.setAttribute('aria-pressed',String(favs.includes(id)));star.setAttribute('aria-label','Favourite '+c.children[1].textContent)}sync();star.onclick=()=>{favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];savePref('catpdf-favs',JSON.stringify(favs));sync();quickRender()};shell.append(star);c.addEventListener('click',()=>{recent=[id,...recent.filter(x=>x!==id)].slice(0,6);savePref('catpdf-recent',JSON.stringify(recent));quickRender()});c.querySelector('.ti').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+paths[i%paths.length]+'"/></svg>';new MutationObserver(()=>{shell.hidden=c.hidden}).observe(c,{attributes:true,attributeFilter:['hidden']});shell.hidden=c.hidden}
 quickRender();
 for(const form of document.querySelectorAll('.extra-form,.smart-form,.conversion-form')){const input=form.querySelector('input[name="source"]');if(!input)continue;const zone=document.createElement('div');zone.className='drop extra-drop';zone.innerHTML='<span class="ico">🐱</span><strong>Drop your file here</strong><span>or click to select</span>';input.before(zone);zone.tabIndex=0;zone.setAttribute('role','button');zone.onclick=()=>input.click();zone.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}};zone.ondragover=e=>{e.preventDefault();zone.classList.add('over')};zone.ondragleave=()=>zone.classList.remove('over');zone.ondrop=e=>{e.preventDefault();zone.classList.remove('over');if(e.dataTransfer.files.length&&!form.closest('.panel').dataset.processing){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))}};input.addEventListener('change',()=>{zone.querySelector('strong').textContent=input.files[0]?.name||'Drop your file here';zone.classList.remove('received');void zone.offsetWidth;zone.classList.add('received')})}
 const celebration=document.createElement('div');celebration.id='downloadCelebration';celebration.hidden=true;celebration.setAttribute('role','status');celebration.innerHTML='<div class="happy">😻 🐾</div><strong>Purr-fect!</strong><div>Your download has started.</div>';document.body.append(celebration);let celebrationTimer;function celebrateDownload(){celebration.hidden=false;clearTimeout(celebrationTimer);celebrationTimer=setTimeout(()=>celebration.hidden=true,2600)}
 </script>
-<script src="smart.js?v=4.5.3"></script>
-<script src="office-render.js?v=4.5.3"></script>
-<script src="pptxgen.bundle.js?v=4.5.3"></script>
-<script src="extraction.js?v=4.5.3"></script>
-<script src="formula.js?v=4.5.3"></script>
-<script src="office-tables.js?v=4.5.3"></script>
+<script src="smart.js?v=4.5.3.1"></script>
+<script src="office-render.js?v=4.5.3.1"></script>
+<script src="pptxgen.bundle.js?v=4.5.3.1"></script>
+<script src="extraction.js?v=4.5.3.1"></script>
+<script src="formula.js?v=4.5.3.1"></script>
+<script src="office-tables.js?v=4.5.3.1"></script>
 <script src="backend-config.js"></script>
-<script src="conversion.js?v=4.5.3"></script>
-<script src="unified.js?v=4.5.3"></script>
+<script src="conversion.js?v=4.5.3.1"></script>
+<script src="unified.js?v=4.5.3.1"></script>
 </body>
 </html>
