@@ -1,7 +1,7 @@
 {
   "name": "CatPDF \u2014 Cute PDF Tools",
   "short_name": "CatPDF",
-  "description": "44 private PDF, image and conversion tools in your browser.",
+  "description": "19 unified tools with 44 PDF, image and conversion functions.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
