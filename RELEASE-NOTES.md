@@ -1,9 +1,8 @@
-# CatPDF v4.3 — development build
-
-- Adds ten client-side conversion tools; 44 unique cards and matching panels.
-- New conversions limit input to 20 MiB, PDF input to 50 pages, Office archive expansion to 60 MB (25 MB per entry). Archive size check uses JSZip internal metadata; not a complete hostile-file sandbox.
-- Office conversion is basic: text-only Word/Excel/PowerPoint to PDF (rasterized), approximate PDF table extraction, image-based PDF to PowerPoint. HTML input is parsed in an inert template and never inserted into the live page. HTML output is escaped. No macros or formulas are executed. Legacy Office formats are unsupported. Scanned PDF requires OCR separately for text extraction.
-- No API keys added. Existing PDF.js eval and XFA protections retained. PDF.js 3.11.174 remains outdated; dependency vulnerability audit and upgrade pending. Existing CDN dependencies remain trusted; offline and security are not certified.
-- Deferred: NLLB model download latency, translation accuracy, RAM benchmarks, API/proxy integration, cancellation behavior, complete browser regression tests. NLLB licensing must be reviewed before commercial use.
-- Validation: Node syntax checks for inline scripts and JS files; 44 unique card-to-panel mappings; ZIP integrity. No browser or Microsoft Office compatibility tests performed. PPTX is a minimal OOXML package and may require compatibility fixes. XLSX extraction does not guarantee column alignment. Original 34 tools retained in source, not regression-tested.
-- Deploy all files except this optional notes file to the existing GitHub Pages root. Keep previous release for rollback.
+# CatPDF 4.3.1 — Stability & Bug Fix
+Based on the supplied 4.3 ZIP. All 44 unique tool cards retain matching panels; legacy hidden watermark panel retained. No API translation added.
+- PDF.js moved from 3.11.174 to 4.10.38 ESM with matching worker, eval and XFA disabled, image size limit and failed loading-task cleanup. CDN unavailable in build environment; integration and current dependency security not verified.
+- Versioned scripts and service worker; local network-first, offline fallback, core-only install. Clear Cache removes CatPDF service worker and app caches, preserves preferences and AI model cache. Confirm before reload.
+- Diagnostic log records bounded session-only generic events, tool identifiers and timestamps, no filenames or document text.
+- Translation worker terminated after AI tasks to release memory; model may need to reload from cache. Advanced compression canvas cleanup on failure. Preview cap 500 pages; PPTX image budget 60 MB; Office archive entry limit 3000.
+- Excel import preserves gaps between referenced columns (max 256). Office conversions remain text/image based. PPTX slide master/layout compatibility remains unresolved; no Office runtime verification.
+- Static audit: 44 unique cards and matching panels; all inline and external JS syntax checked. No end-to-end conversion, mobile, offline, CDN or memory benchmark performed. Translation speed and API integration deferred. Full security audit not complete.

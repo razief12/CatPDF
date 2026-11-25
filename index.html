@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="stability.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <style>
@@ -358,7 +358,7 @@ body{background-image:var(--cat-pattern);background-size:180px 160px;background-
   <section class="panel" id="panel-pdfdocx"><div class="card"><h2>PDF to Word</h2><p class="hint">Editable text; original layout and images are not retained. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pdfdocx"><label class="field">Choose file<input type="file" name="source" accept=".pdf" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-docxpdf"><div class="card"><h2>Word to PDF</h2><p class="hint">Text and table contents only; formatting and images are not retained. Limit: 20 MB input.</p><form class="conversion-form" data-kind="docxpdf"><label class="field">Choose file<input type="file" name="source" accept=".docx" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-pdfxlsx"><div class="card"><h2>PDF to Excel</h2><p class="hint">Approximate columns from text positions; check extracted data. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pdfxlsx"><label class="field">Choose file<input type="file" name="source" accept=".pdf" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-xlsxpdf"><div class="card"><h2>Excel to PDF</h2><p class="hint">Exports cell values as paginated text; no charts or formatting. Limit: 20 MB input.</p><form class="conversion-form" data-kind="xlsxpdf"><label class="field">Choose file<input type="file" name="source" accept=".xlsx" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-pdfpptx"><div class="card"><h2>PDF to PowerPoint</h2><p class="hint">One image per slide; text is not editable. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pdfpptx"><label class="field">Choose file<input type="file" name="source" accept=".pdf" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-pptxpdf"><div class="card"><h2>PowerPoint to PDF</h2><p class="hint">Extracts slide text only; no graphics or layout. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pptxpdf"><label class="field">Choose file<input type="file" name="source" accept=".pptx" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-txtpdf"><div class="card"><h2>Text to PDF</h2><p class="hint">Creates a paginated text document. Limit: 20 MB input.</p><form class="conversion-form" data-kind="txtpdf"><label class="field">Choose file<input type="file" name="source" accept=".txt" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-htmlpdf"><div class="card"><h2>HTML to PDF</h2><p class="hint">Extracts visible text only; no scripts, styles or remote assets. Limit: 20 MB input.</p><form class="conversion-form" data-kind="htmlpdf"><label class="field">Choose file<input type="file" name="source" accept=".html,.htm" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-pdfhtml"><div class="card"><h2>PDF to HTML</h2><p class="hint">Exports escaped text with page sections. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pdfhtml"><label class="field">Choose file<input type="file" name="source" accept=".pdf" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><section class="panel" id="panel-pdfmd"><div class="card"><h2>PDF to Markdown</h2><p class="hint">Exports text with page headings; no layout reconstruction. Limit: 20 MB input.</p><form class="conversion-form" data-kind="pdfmd"><label class="field">Choose file<input type="file" name="source" accept=".pdf" required style="display:block"></label><button class="btn" type="submit">Convert</button><p class="conversion-status" role="status"></p><button type="button" class="btn conversion-save" hidden>Download result</button></form></div></section><div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v4.3</span></div><footer>
     <span data-i18n="footer.line1"></span><br>
     <span data-i18n="footer.line2"></span>
-  </footer>
+  <div id="cat-maintenance"></div></footer>
 </div>
 
 <button class="corner-cat" id="cornerCat" title="Click or drag the cat" aria-label="Interactive cat mascot">
@@ -429,7 +429,7 @@ const I18N = {
     'toast.badPage':'Invalid page number.','toast.noSelection':'Please select at least one page.',
     'toast.installed':'Miaw! CatPDF installed! 🐾',
     'footer.line1':'CatPDF 🐱 · Built with pdf-lib · pdf.js · JSZip',
-    'footer.line2':'100% in your browser. Works offline. No uploads. No cats harmed. 🐾'
+    'footer.line2':'100% in your browser. Offline after dependencies are cached. No document uploads. No cats harmed. 🐾'
   }
 };
 const LANG = 'en';
@@ -464,7 +464,7 @@ const $ = s => document.querySelector(s);
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const MAX_FILE = 100 * 1024 * 1024;
 let previewUrl = null;
-if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 
 const toastEl = $('#toast');
 const cornerCat = $('#cornerCat');
@@ -472,6 +472,7 @@ let toastTimer;
 function toast(msg, type = '') {
   toastEl.textContent = msg;
   toastEl.className = 'show ' + type;
+  if (type === 'err') CatStability.record('Tool error');
   if (type === 'ok') {
     cornerCat.classList.remove('celebrate');
     void cornerCat.offsetWidth;
@@ -530,12 +531,15 @@ function fmtSize(b) {
   return (b/1048576).toFixed(1) + ' MB';
 }
 async function loadPdfJs(buffer) {
-  return await pdfjsLib.getDocument({ data: buffer.slice(0), isEvalSupported: false, enableXfa: false }).promise;
+  const lib = await CatStability.pdf();
+  const task = lib.getDocument({data:buffer,isEvalSupported:false,enableXfa:false,maxImageSize:16000000});
+  try { return await task.promise; } catch(e) { await task.destroy().catch(()=>{}); throw e; }
 }
 async function renderThumbs(pdf, gridEl, opts = {}) {
   gridEl.innerHTML = '';
   const total = pdf.numPages;
   const cap = total;
+  if(total > 500) throw Error("Preview limit: 500 pages. Split the PDF first.");
   for (let i = 1; i <= cap; i++) {
     const thumb = document.createElement('div');
     thumb.className = 'thumb';
@@ -1146,7 +1150,7 @@ if (isIOS && !isStandalone) {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const reg = await navigator.serviceWorker.register('sw.js');
+      const reg = await navigator.serviceWorker.register('sw.js', {updateViaCache:'none'});
       if (reg.waiting && navigator.serviceWorker.controller) {
         document.getElementById('updateBanner').classList.add('show');
         document.getElementById('updateBtn').onclick = () => { navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), {once:true}); reg.waiting?.postMessage({type:'SKIP_WAITING'}); };
@@ -1208,7 +1212,7 @@ quickRender();
 for(const form of document.querySelectorAll('.extra-form,.smart-form,.conversion-form')){const input=form.querySelector('input[name="source"]');if(!input)continue;const zone=document.createElement('div');zone.className='drop extra-drop';zone.innerHTML='<span class="ico">🐱</span><strong>Drop your file here</strong><span>or click to select</span>';input.before(zone);zone.tabIndex=0;zone.setAttribute('role','button');zone.onclick=()=>input.click();zone.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}};zone.ondragover=e=>{e.preventDefault();zone.classList.add('over')};zone.ondragleave=()=>zone.classList.remove('over');zone.ondrop=e=>{e.preventDefault();zone.classList.remove('over');if(e.dataTransfer.files.length&&!form.closest('.panel').dataset.processing){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))}};input.addEventListener('change',()=>{zone.querySelector('strong').textContent=input.files[0]?.name||'Drop your file here';zone.classList.remove('received');void zone.offsetWidth;zone.classList.add('received')})}
 const celebration=document.createElement('div');celebration.id='downloadCelebration';celebration.hidden=true;celebration.setAttribute('role','status');celebration.innerHTML='<div class="happy">😻 🐾</div><strong>Purr-fect!</strong><div>Your download has started.</div>';document.body.append(celebration);let celebrationTimer;function celebrateDownload(){celebration.hidden=false;clearTimeout(celebrationTimer);celebrationTimer=setTimeout(()=>celebration.hidden=true,2600)}
 </script>
-<script src="smart.js"></script>
-<script src="conversion.js"></script>
+<script src="smart.js?v=4.3.1"></script>
+<script src="conversion.js?v=4.3.1"></script>
 </body>
 </html>
