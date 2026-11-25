@@ -1,0 +1,17 @@
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+pdfdocx PASS smoke 45791
+pdfxlsx PASS smoke 18045
+pdfpptx PASS smoke 1099781
+pdfimg PASS smoke 1067788
+pdftxt PASS smoke 25831
+pdfhtml PASS smoke 160841
+pdfmd PASS smoke 16680
+docxpdf PASS smoke 12604
+xlsxpdf PASS smoke 290932
+pptxpdf PASS smoke 925043
+imgpdf PASS smoke 1712
+txtpdf PASS smoke 2894
+htmlpdf PASS smoke 3024
+jpgpng PASS smoke 287
+pngjpg PASS smoke 827
+webp PASS smoke 42
