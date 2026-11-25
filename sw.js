@@ -1,5 +1,5 @@
 /* CatPDF Service Worker — offline-first cache */
-const VERSION = 'catpdf-v4.2';
+const VERSION = 'catpdf-v4.2.1';
 const STATIC_CACHE  = VERSION + '-static';
 const RUNTIME_CACHE = VERSION + '-runtime';
 
@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
   './icon.svg',
   './meow.wav',
   './smart.js',
+  './translation-worker.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
