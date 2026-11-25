@@ -4,7 +4,7 @@ import fitz
 from PIL import Image, ImageOps
 from docx import Document
 from docx.shared import Pt, Inches
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, Border, Side
 from pptx import Presentation
 from pptx.util import Inches as PI
@@ -17,10 +17,33 @@ warnings.simplefilter("error", Image.DecompressionBombWarning)
 def no_fetch(url,*args,**kwargs):
     raise ValueError('External resources disabled')
 
+def prepare_excel_layout(src):
+    # Modify only the temporary upload, never the user's original workbook.
+    wb = load_workbook(src)
+    try:
+        for ws in wb.worksheets:
+            if ws.sheet_state != 'visible':
+                continue
+            ws.sheet_properties.pageSetUpPr.fitToPage = True
+            ws.page_setup.scale = None
+            ws.page_setup.fitToWidth = 1
+            ws.page_setup.fitToHeight = 0
+            if not ws.page_setup.paperSize:
+                ws.page_setup.paperSize = ws.PAPERSIZE_A4
+            if ws.max_column >= 6:
+                ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+            elif not ws.page_setup.orientation:
+                ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT
+            ws.col_breaks.brk = []
+        wb.save(src)
+    finally:
+        wb.close()
+
 def office(src,out):
     with zipfile.ZipFile(src) as z:
         if len(z.infolist())>5000 or sum(i.file_size for i in z.infolist())>150_000_000: raise ValueError('Office archive too large')
         if any('vbaProject' in i.filename or 'externalLinks/' in i.filename for i in z.infolist()): raise ValueError('Macros and external workbook links are not supported')
+    if src.suffix.lower() == '.xlsx': prepare_excel_layout(src)
     p=subprocess.run(['libreoffice','-env:UserInstallation='+ (out.parent/'profile').as_uri(),'--headless','--convert-to','pdf','--outdir',str(out.parent),str(src)],capture_output=True,timeout=90)
     generated=src.with_suffix('.pdf')
     if p.returncode or not generated.exists(): raise ValueError('Office rendering failed')
