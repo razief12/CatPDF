@@ -784,7 +784,7 @@ $('#btnImg').addEventListener('click', async () => {
   const btn = $('#btnImg'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const doc = await PDFLib.PDFDocument.create();
-    const A4 = [595.28, 841.89], M = 28;
+    const M = 28;
     for (const file of imageFiles) {
       let emb;
       if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
@@ -792,6 +792,7 @@ $('#btnImg').addEventListener('click', async () => {
       } else {
         emb = await doc.embedPng(await imageToPngBytes(file));
       }
+      const A4 = emb.width > emb.height ? [841.89,595.28] : [595.28,841.89];
       const page = doc.addPage(A4);
       const maxW = A4[0] - M*2, maxH = A4[1] - M*2;
       const sc = Math.min(maxW/emb.width, maxH/emb.height);
@@ -1214,14 +1215,14 @@ quickRender();
 for(const form of document.querySelectorAll('.extra-form,.smart-form,.conversion-form')){const input=form.querySelector('input[name="source"]');if(!input)continue;const zone=document.createElement('div');zone.className='drop extra-drop';zone.innerHTML='<span class="ico">🐱</span><strong>Drop your file here</strong><span>or click to select</span>';input.before(zone);zone.tabIndex=0;zone.setAttribute('role','button');zone.onclick=()=>input.click();zone.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}};zone.ondragover=e=>{e.preventDefault();zone.classList.add('over')};zone.ondragleave=()=>zone.classList.remove('over');zone.ondrop=e=>{e.preventDefault();zone.classList.remove('over');if(e.dataTransfer.files.length&&!form.closest('.panel').dataset.processing){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))}};input.addEventListener('change',()=>{zone.querySelector('strong').textContent=input.files[0]?.name||'Drop your file here';zone.classList.remove('received');void zone.offsetWidth;zone.classList.add('received')})}
 const celebration=document.createElement('div');celebration.id='downloadCelebration';celebration.hidden=true;celebration.setAttribute('role','status');celebration.innerHTML='<div class="happy">😻 🐾</div><strong>Purr-fect!</strong><div>Your download has started.</div>';document.body.append(celebration);let celebrationTimer;function celebrateDownload(){celebration.hidden=false;clearTimeout(celebrationTimer);celebrationTimer=setTimeout(()=>celebration.hidden=true,2600)}
 </script>
-<script src="smart.js?v=4.5.1"></script>
-<script src="office-render.js?v=4.5.1"></script>
-<script src="pptxgen.bundle.js?v=4.5.1"></script>
-<script src="extraction.js?v=4.5.1"></script>
-<script src="formula.js?v=4.5.1"></script>
-<script src="office-tables.js?v=4.5.1"></script>
+<script src="smart.js?v=4.5.3"></script>
+<script src="office-render.js?v=4.5.3"></script>
+<script src="pptxgen.bundle.js?v=4.5.3"></script>
+<script src="extraction.js?v=4.5.3"></script>
+<script src="formula.js?v=4.5.3"></script>
+<script src="office-tables.js?v=4.5.3"></script>
 <script src="backend-config.js"></script>
-<script src="conversion.js?v=4.5.1"></script>
-<script src="unified.js?v=4.5.1"></script>
+<script src="conversion.js?v=4.5.3"></script>
+<script src="unified.js?v=4.5.3"></script>
 </body>
 </html>
