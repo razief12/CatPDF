@@ -15,6 +15,7 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff8fab" id="themeColorMeta">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CatPDF">
@@ -183,6 +184,10 @@
   .update-banner button{padding:5px 12px;border-radius:999px;border:0;cursor:pointer;background:var(--pink);color:#fff;font-family:'Fredoka',sans-serif;font-size:12.5px;font-weight:600}
   footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px;line-height:1.8;font-weight:600}
   @media(max-width:520px){.hero h1{font-size:28px}.card{padding:20px 16px}.viewer-box{height:420px}.topbar .brand{font-size:18px}.ctrl-btn{padding:8px 11px;font-size:12.5px}.corner-cat{width:48px;height:48px;bottom:14px;right:14px}.update-banner{top:58px;font-size:12px;padding:7px 14px}}
+
+/* v3.0 workspace */
+.wrap{max-width:1180px}.topbar{padding:14px 0}.hero{display:grid;grid-template-columns:1fr 210px;align-items:center;text-align:left;padding:36px 34px;margin:24px 0;border:1px solid var(--line);border-radius:28px;background:var(--card);box-shadow:0 16px 48px -36px var(--shadow)}
+.hero .mascot-wrap{grid-column:2;grid-row:1/5;justify-self:center}.hero h1{grid-column:1;grid-row:2;font-size:clamp(28px,4vw,48px);margin:8px 0}.hero p{grid-column:1;grid-row:3;margin:0;max-width:580px}.hero .cta{grid-column:1;grid-row:4;justify-self:start}.eyebrow{grid-column:1;grid-row:1;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 12px}.workspace-head h2{font-family:Fredoka,sans-serif;font-size:25px;margin:0}.workspace-head input{max-width:320px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters button[aria-pressed=true]{background:var(--pink-soft);border-color:var(--pink)}.tools{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;scroll-margin-top:90px}.tool-card{align-items:flex-start;text-align:left;padding:16px;min-height:112px;font-size:15px;gap:7px}.tool-card .ti{background:var(--pink-soft);padding:8px;border-radius:12px;font-size:23px}.tool-desc{font-family:Nunito,sans-serif;color:var(--muted);font-size:12px;font-weight:600;line-height:1.4}.tool-card[hidden]{display:none}.card{border-radius:20px}.drop{padding:34px 16px}.drop:focus-within{outline:2px solid var(--pink)}.busy-indicator{display:none;align-items:center;gap:10px;margin:12px 0;color:var(--text);font-size:13px}.panel[data-processing=true] .busy-indicator,.panel[data-loading=true] .busy-indicator{display:flex}.busy-indicator progress{width:100px;accent-color:var(--pink)}.privacy-strip{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0;color:var(--muted);font-size:12px;font-weight:800}.version{font-size:11px;color:var(--muted)}.empty-tools{padding:16px;color:var(--muted)}button:focus-visible{outline:3px solid var(--pink);outline-offset:3px}@media(max-width:850px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.hero{display:flex;flex-direction:column;text-align:center;padding:20px;margin:14px 0}.hero .mascot-wrap{order:-1}.hero .mascot{width:100px;height:100px}.hero .cta{align-self:center}.workspace-head{align-items:stretch;flex-direction:column;gap:8px}.workspace-head input{max-width:none}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tool-card{padding:12px;min-height:105px}.version{display:none}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -213,6 +218,7 @@
   </header>
 
   <section class="hero">
+<span class="eyebrow" data-i18n="v3.eyebrow"></span>
     <div class="mascot-wrap">
       <svg class="mascot" viewBox="0 0 200 200" aria-hidden="true">
         <g class="cat-body">
@@ -248,7 +254,9 @@
     <button class="cta" id="heroCta"><span data-i18n="hero.cta"></span> ↓</button>
   </section>
 
-  <nav class="tools" id="tools">
+  <div class="workspace-head"><h2 data-i18n="v3.workspace"></h2><input id="toolSearch" type="text" aria-label="Search PDF tools" autocomplete="off"></div>
+<div class="filters" id="toolFilters" aria-label="Tool categories"></div>
+<nav class="tools" id="tools">
     <button class="tool-card active" data-tool="view"><span class="ti">👁️</span><span data-i18n="tool.view"></span></button>
     <button class="tool-card" data-tool="merge"><span class="ti">🔗</span><span data-i18n="tool.merge"></span></button>
     <button class="tool-card" data-tool="split"><span class="ti">✂️</span><span data-i18n="tool.split"></span></button>
@@ -260,7 +268,7 @@
     <button class="tool-card" data-tool="text"><span class="ti">📝</span><span data-i18n="tool.text"></span></button>
     <button class="tool-card" data-tool="pagenum"><span class="ti">#️⃣</span><span data-i18n="tool.pagenum"></span></button>
     <button class="tool-card" data-tool="organize"><span class="ti">🎨</span><span data-i18n="tool.organize"></span></button>
-  </nav>
+  </nav><p id="emptyTools" class="empty-tools" hidden data-i18n="v3.empty"></p>
 
   <main>
     <section class="panel active" id="panel-view"><div class="card"><h2 data-i18n="view.title"></h2><p class="hint" data-i18n="view.hint"></p><div class="drop" id="dropView"><span class="ico">📂</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="fileView" accept="application/pdf,.pdf"><div class="viewer-box" id="viewerBox"><iframe id="viewerFrame" title="PDF preview"></iframe></div></div></section>
@@ -276,7 +284,7 @@
     <section class="panel" id="panel-organize"><div class="card"><h2 data-i18n="organize.title"></h2><p class="hint" data-i18n="organize.hint"></p><div class="drop" id="dropOrganize"><span class="ico">🎨</span><strong data-i18n="drop.title"></strong><span data-i18n="drop.single.sub"></span></div><input type="file" id="fileOrganize" accept="application/pdf,.pdf"><div class="list" id="organizeInfo"></div><div id="organizeForm" style="display:none"><div class="thumb-actions"><span style="font-size:12.5px;color:var(--muted);font-weight:700" data-i18n="organize.tip"></span></div><div class="thumb-grid" id="organizeGrid"></div><button class="btn" id="btnOrganize" data-i18n="btn.organize"></button></div></div></section>
   </main>
 
-  <footer>
+  <div class="privacy-strip"><span data-i18n="v3.private"></span><span data-i18n="v3.offline"></span><span>CatPDF v3.0</span></div><footer>
     <span data-i18n="footer.line1"></span><br>
     <span data-i18n="footer.line2"></span>
   </footer>
@@ -1144,6 +1152,19 @@ if (toolParam) {
 }
 
 applyLang();
+
+// v3.0 UI enhancements; original PDF handlers remain unchanged.
+const v3copy={en:{eyebrow:'Your private PDF workspace',workspace:'PDF tools',empty:'No matching tools. Try another search.',private:'🔒 Files stay on your device',offline:'✓ Offline-ready after setup',search:'Search tools…',all:'All tools',organize:'Organize',convert:'Convert',edit:'Edit & optimize',busy:'Processing…'},ms:{eyebrow:'Ruang kerja PDF peribadi anda',workspace:'Alat PDF',empty:'Tiada alat sepadan. Cuba carian lain.',private:'🔒 Fail kekal pada peranti anda',offline:'✓ Sedia luar talian selepas persediaan',search:'Cari alat…',all:'Semua alat',organize:'Susun',convert:'Tukar',edit:'Edit & optimum',busy:'Sedang diproses…'}};
+for(const lang of ['en','ms']) for(const [key,value] of Object.entries(v3copy[lang])) I18N[lang]['v3.'+key]=value;
+const v3tools={view:['organize','Preview a PDF','Pratonton PDF'],merge:['organize','Combine documents','Gabung dokumen'],split:['organize','Extract selected pages','Ekstrak halaman'],img:['convert','Turn images into PDF','Tukar imej kepada PDF'],rotate:['edit','Change page orientation','Putar halaman'],wm:['edit','Stamp a cat watermark','Tambah tera air kucing'],toimg:['convert','Export pages as images','Eksport halaman sebagai imej'],compress:['edit','Optimize PDF file size','Optimumkan saiz PDF'],text:['convert','Extract document text','Ekstrak teks dokumen'],pagenum:['edit','Number your pages','Nomborkan halaman'],organize:['organize','Reorder or delete pages','Susun atau buang halaman']};
+let v3category='all';
+const v3search=document.getElementById('toolSearch');
+const v3cards=[...document.querySelectorAll('.tool-card')];
+for(const card of v3cards){const desc=document.createElement('span');desc.className='tool-desc';card.append(desc);}
+for(const panel of document.querySelectorAll('.panel')){const busy=document.createElement('div');busy.className='busy-indicator';busy.setAttribute('role','status');const progress=document.createElement('progress');progress.setAttribute('aria-label','Processing');const label=document.createElement('span');label.dataset.i18n='v3.busy';busy.append(progress,label);panel.querySelector('.card').append(busy);}
+function v3filter(){const q=v3search.value.trim().toLowerCase();let count=0;for(const card of v3cards){const info=v3tools[card.dataset.tool];const hay=[card.textContent,I18N.en['tool.'+card.dataset.tool],I18N.ms['tool.'+card.dataset.tool],...info].join(' ').toLowerCase();card.hidden=!( (v3category==='all'||info[0]===v3category)&&hay.includes(q));if(!card.hidden)count++;}document.getElementById('emptyTools').hidden=count!==0;}
+function v3render(){v3search.placeholder=t('v3.search');v3search.setAttribute('aria-label',t('v3.search'));const filters=document.getElementById('toolFilters');filters.replaceChildren();for(const cat of ['all','organize','convert','edit']){const b=document.createElement('button');b.type='button';b.className='ctrl-btn';b.textContent=t('v3.'+cat);b.setAttribute('aria-pressed',String(cat===v3category));b.addEventListener('click',()=>{v3category=cat;v3render();});filters.append(b);}for(const card of v3cards)card.querySelector('.tool-desc').textContent=v3tools[card.dataset.tool][LANG==='ms'?2:1];document.querySelectorAll('[data-i18n^="v3."]').forEach(el=>el.textContent=t(el.dataset.i18n));v3filter();}
+v3search.addEventListener('input',v3filter);document.getElementById('langBtn').addEventListener('click',v3render);v3render();
 </script>
 </body>
 </html>
