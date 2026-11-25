@@ -1,5 +1,5 @@
 /* CatPDF Service Worker — offline-first cache */
-const VERSION = 'catpdf-v2.2';
+const VERSION = 'catpdf-v2.3';
 const STATIC_CACHE  = VERSION + '-static';
 const RUNTIME_CACHE = VERSION + '-runtime';
 
@@ -19,8 +19,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-      .catch(err => console.warn('[CatPDF SW] Precache failed:', err))
+      
+      
   );
 });
 
@@ -28,7 +28,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== STATIC_CACHE && k !== RUNTIME_CACHE)
+        keys.filter(k => /^catpdf-v[\d.]+-(static|runtime)$/.test(k) && k !== STATIC_CACHE && k !== RUNTIME_CACHE)
             .map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
@@ -43,7 +43,12 @@ self.addEventListener('fetch', (event) => {
   const knownCdn = url.hostname === 'cdnjs.cloudflare.com'
     || url.hostname === 'fonts.googleapis.com'
     || url.hostname === 'fonts.gstatic.com';
+  if (sameOrigin && !url.href.startsWith(self.registration.scope)) return;
   if (!sameOrigin && !knownCdn) return;
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).catch(() => caches.open(STATIC_CACHE).then(c => c.match('./index.html'))));
+    return;
+  }
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;

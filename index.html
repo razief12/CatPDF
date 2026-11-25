@@ -438,7 +438,10 @@ try {
 } catch(e){}
 
 const $ = s => document.querySelector(s);
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MAX_FILE = 100 * 1024 * 1024;
+let previewUrl = null;
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const toastEl = $('#toast');
 const cornerCat = $('#cornerCat');
@@ -466,17 +469,28 @@ function downloadBlob(blob, filename) {
 }
 function downloadBytes(bytes, filename) { downloadBlob(new Blob([bytes], { type: 'application/pdf' }), filename); }
 function wireDrop(dropEl, inputEl, onFiles, multiple = false) {
+  const panel = dropEl.closest('.panel');
+  let loading = false;
+  const accept = async files => {
+    if (loading || panel.dataset.processing === 'true') return;
+    if (files.some(f => f.size > MAX_FILE) || files.reduce((n,f)=>n+f.size,0)>MAX_FILE) return toast(LANG === 'ms' ? 'Had fail 100 MB setiap pilihan.' : '100 MB limit per selection.', 'err');
+    loading = true; panel.dataset.loading = 'true';
+    try { await onFiles(files); } catch(e) { console.error(e); toast(t('toast.err'),'err'); }
+    finally { loading = false; delete panel.dataset.loading; }
+  };
+  dropEl.tabIndex = 0; dropEl.setAttribute('role','button');
+  dropEl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputEl.click(); } });
   dropEl.addEventListener('click', () => inputEl.click());
   dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('over'); });
   dropEl.addEventListener('dragleave', () => dropEl.classList.remove('over'));
   dropEl.addEventListener('drop', e => {
     e.preventDefault(); dropEl.classList.remove('over');
     const files = [...e.dataTransfer.files];
-    if (files.length) onFiles(multiple ? files : files.slice(0,1));
+    if (files.length) accept(multiple ? files : files.slice(0,1));
   });
   inputEl.addEventListener('change', () => {
     const files = [...inputEl.files];
-    if (files.length) onFiles(files);
+    if (files.length) accept(files);
     inputEl.value = '';
   });
 }
@@ -486,12 +500,12 @@ function fmtSize(b) {
   return (b/1048576).toFixed(1) + ' MB';
 }
 async function loadPdfJs(buffer) {
-  return await pdfjsLib.getDocument({ data: buffer.slice(0) }).promise;
+  return await pdfjsLib.getDocument({ data: buffer.slice(0), isEvalSupported: false, enableXfa: false }).promise;
 }
 async function renderThumbs(pdf, gridEl, opts = {}) {
   gridEl.innerHTML = '';
   const total = pdf.numPages;
-  const cap = Math.min(total, 200);
+  const cap = total;
   for (let i = 1; i <= cap; i++) {
     const thumb = document.createElement('div');
     thumb.className = 'thumb';
@@ -518,11 +532,13 @@ async function renderThumbs(pdf, gridEl, opts = {}) {
     gridEl.appendChild(thumb);
     try {
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 0.32 });
+      const base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: Math.min(0.32, 180 / Math.max(base.width, base.height)) });
       const canvas = thumb.querySelector('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
       await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-    } catch(e){}
+      page.cleanup();
+    } catch(e){ console.warn(e); }
     if (i % 8 === 0) await new Promise(r => setTimeout(r, 0));
   }
   if (opts.reorder) setupDragReorder(gridEl);
@@ -556,6 +572,12 @@ function setupDragReorder(grid) {
   });
 }
 
+document.addEventListener('click', e => {
+  const panel = e.target.closest('.panel');
+  if (panel && (panel.dataset.loading === 'true' || panel.dataset.processing === 'true')) {
+    e.preventDefault(); e.stopImmediatePropagation();
+  }
+}, true);
 document.querySelectorAll('.tool-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
@@ -572,7 +594,9 @@ $('#heroCta').addEventListener('click', () => {
 wireDrop($('#dropView'), $('#fileView'), files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
-  $('#viewerFrame').src = URL.createObjectURL(f);
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = URL.createObjectURL(f);
+  $('#viewerFrame').src = previewUrl;
   $('#viewerBox').classList.add('show');
   toast(t('toast.ok'), 'ok');
 });
@@ -583,7 +607,7 @@ function renderMergeList() {
   mergeFiles.forEach((entry, i) => {
     const el = document.createElement('div');
     el.className = 'item';
-    el.innerHTML = `<span style="opacity:.7">📄</span><span class="name" title="${entry.file.name}">${entry.file.name}</span><span class="pages">${entry.pages} ${t('unit.pages')} · ${fmtSize(entry.file.size)}</span><span class="btns"><button class="mini" data-act="up" data-i="${i}">▲</button><button class="mini" data-act="down" data-i="${i}">▼</button><button class="mini del" data-act="del" data-i="${i}">✕</button></span>`;
+    el.innerHTML = `<span style="opacity:.7">📄</span><span class="name" title="${esc(entry.file.name)}">${esc(entry.file.name)}</span><span class="pages">${entry.pages} ${t('unit.pages')} · ${fmtSize(entry.file.size)}</span><span class="btns"><button class="mini" data-act="up" data-i="${i}">▲</button><button class="mini" data-act="down" data-i="${i}">▼</button><button class="mini del" data-act="del" data-i="${i}">✕</button></span>`;
     list.appendChild(el);
   });
   $('#btnMerge').disabled = mergeFiles.length < 2;
@@ -599,34 +623,35 @@ $('#mergeList').addEventListener('click', e => {
 wireDrop($('#dropMerge'), $('#fileMerge'), async files => {
   const pdfs = files.filter(f => /\.pdf$/i.test(f.name));
   if (!pdfs.length) return toast(t('toast.nopdf'), 'err');
+  let added = 0;
   for (const f of pdfs) {
     try {
-      const doc = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption:true });
-      mergeFiles.push({ file:f, pages: doc.getPageCount() });
+      const doc = await PDFLib.PDFDocument.load(await f.arrayBuffer());
+      mergeFiles.push({ file:f, pages: doc.getPageCount() }); added++;
     } catch(e){ toast(t('toast.err'), 'err'); }
   }
   renderMergeList();
-  toast(tf('toast.addedFiles', { n: pdfs.length }), 'ok');
+  if (added) toast(tf('toast.addedFiles', { n: added }), 'ok');
 }, true);
 $('#btnMerge').addEventListener('click', async () => {
-  const btn = $('#btnMerge'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnMerge'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const out = await PDFLib.PDFDocument.create();
     for (const entry of mergeFiles) {
-      const src = await PDFLib.PDFDocument.load(await entry.file.arrayBuffer(), { ignoreEncryption:true });
+      const src = await PDFLib.PDFDocument.load(await entry.file.arrayBuffer());
       const pages = await out.copyPages(src, src.getPageIndices());
       pages.forEach(p => out.addPage(p));
     }
     downloadBytes(await out.save(), 'catpdf-merged.pdf');
     toast(tf('toast.merged', { n: out.getPageCount() }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = mergeFiles.length < 2; btn.textContent = t('btn.merge'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = mergeFiles.length < 2; btn.textContent = t('btn.merge'); }
 });
 
 let splitDoc = null, splitName = '', splitPdfJs = null;
 function renderSplitInfo() {
   if (!splitDoc) { $('#splitInfo').innerHTML = ''; return; }
-  $('#splitInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${splitName}.pdf</span><span class="pages">${splitDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
+  $('#splitInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(splitName)}.pdf</span><span class="pages">${splitDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
   updateSplitCount();
 }
 function updateSplitCount() {
@@ -637,9 +662,12 @@ function updateSplitCount() {
 wireDrop($('#dropSplit'), $('#fileSplit'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#splitForm').style.display = 'none';
   try {
     const buf = await f.arrayBuffer();
-    splitDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption:true });
+    splitDoc = await PDFLib.PDFDocument.load(buf.slice(0));
+    if (splitPdfJs) await splitPdfJs.destroy();
+    splitPdfJs = null;
     splitPdfJs = await loadPdfJs(buf);
     splitName = f.name.replace(/\.pdf$/i,'');
     renderSplitInfo();
@@ -661,7 +689,7 @@ $('#btnSplit').addEventListener('click', async () => {
   if (!splitDoc) return toast(t('toast.needFile'), 'err');
   const indices = [...document.querySelectorAll('#splitGrid .thumb.selected')].map(t => +t.dataset.page - 1);
   if (!indices.length) return toast(t('toast.noSelection'), 'err');
-  const btn = $('#btnSplit'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnSplit'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const out = await PDFLib.PDFDocument.create();
     const pages = await out.copyPages(splitDoc, indices);
@@ -669,7 +697,7 @@ $('#btnSplit').addEventListener('click', async () => {
     downloadBytes(await out.save(), `${splitName}-catpdf.pdf`);
     toast(tf('toast.extracted', { n: indices.length }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.split'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.split'); }
 });
 
 let imageFiles = [];
@@ -678,7 +706,7 @@ function renderImgList() {
   imageFiles.forEach((f, i) => {
     const el = document.createElement('div');
     el.className = 'item';
-    el.innerHTML = `<span style="opacity:.7">🖼️</span><span class="name" title="${f.name}">${f.name}</span><span class="pages">${fmtSize(f.size)}</span><span class="btns"><button class="mini" data-act="up" data-i="${i}">▲</button><button class="mini" data-act="down" data-i="${i}">▼</button><button class="mini del" data-act="del" data-i="${i}">✕</button></span>`;
+    el.innerHTML = `<span style="opacity:.7">🖼️</span><span class="name" title="${esc(f.name)}">${esc(f.name)}</span><span class="pages">${fmtSize(f.size)}</span><span class="btns"><button class="mini" data-act="up" data-i="${i}">▲</button><button class="mini" data-act="down" data-i="${i}">▼</button><button class="mini del" data-act="del" data-i="${i}">✕</button></span>`;
     list.appendChild(el);
   });
   $('#btnImg').disabled = imageFiles.length === 0;
@@ -705,15 +733,17 @@ async function imageToPngBytes(file) {
       const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url;
     });
     const c = document.createElement('canvas');
+    if (img.naturalWidth * img.naturalHeight > 16000000) throw new Error("Image too large");
     c.width = img.naturalWidth; c.height = img.naturalHeight;
     c.getContext('2d').drawImage(img, 0, 0);
     const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    if (!blob) throw new Error("Image conversion failed");
     return new Uint8Array(await blob.arrayBuffer());
   } finally { URL.revokeObjectURL(url); }
 }
 $('#btnImg').addEventListener('click', async () => {
   if (!imageFiles.length) return;
-  const btn = $('#btnImg'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnImg'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const doc = await PDFLib.PDFDocument.create();
     const A4 = [595.28, 841.89], M = 28;
@@ -733,19 +763,20 @@ $('#btnImg').addEventListener('click', async () => {
     downloadBytes(await doc.save(), 'catpdf-images.pdf');
     toast(tf('toast.converted', { n: imageFiles.length }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = imageFiles.length === 0; btn.textContent = t('btn.img'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = imageFiles.length === 0; btn.textContent = t('btn.img'); }
 });
 
 let rotateDoc = null, rotateName = '';
 function renderRotateInfo() {
   if (!rotateDoc) { $('#rotateInfo').innerHTML = ''; return; }
-  $('#rotateInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${rotateName}.pdf</span><span class="pages">${rotateDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
+  $('#rotateInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(rotateName)}.pdf</span><span class="pages">${rotateDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
 }
 wireDrop($('#dropRotate'), $('#fileRotate'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#rotateForm').style.display = 'none';
   try {
-    rotateDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption:true });
+    rotateDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer());
     rotateName = f.name.replace(/\.pdf$/i,'');
     renderRotateInfo();
     $('#rotateForm').style.display = 'block';
@@ -755,7 +786,7 @@ wireDrop($('#dropRotate'), $('#fileRotate'), async files => {
 $('#btnRotate').addEventListener('click', async () => {
   if (!rotateDoc) return toast(t('toast.needFile'), 'err');
   const angle = parseInt($('#rotateAngle').value, 10);
-  const btn = $('#btnRotate'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnRotate'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const doc = await PDFLib.PDFDocument.load(await rotateDoc.save());
     doc.getPages().forEach(page => {
@@ -765,19 +796,20 @@ $('#btnRotate').addEventListener('click', async () => {
     downloadBytes(await doc.save(), `${rotateName}-rotated.pdf`);
     toast(t('toast.rotated'), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.rotate'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.rotate'); }
 });
 
 let wmDoc = null, wmName = '';
 function renderWmInfo() {
   if (!wmDoc) { $('#wmInfo').innerHTML = ''; return; }
-  $('#wmInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${wmName}.pdf</span><span class="pages">${wmDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
+  $('#wmInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(wmName)}.pdf</span><span class="pages">${wmDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
 }
 wireDrop($('#dropWm'), $('#fileWm'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#wmForm').style.display = 'none';
   try {
-    wmDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption:true });
+    wmDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer());
     wmName = f.name.replace(/\.pdf$/i,'');
     renderWmInfo();
     $('#wmForm').style.display = 'block';
@@ -786,7 +818,7 @@ wireDrop($('#dropWm'), $('#fileWm'), async files => {
 });
 $('#btnWm').addEventListener('click', async () => {
   if (!wmDoc) return toast(t('toast.needFile'), 'err');
-  const btn = $('#btnWm'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnWm'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const { rgb, degrees } = PDFLib;
     const doc = await PDFLib.PDFDocument.load(await wmDoc.save());
@@ -807,20 +839,23 @@ $('#btnWm').addEventListener('click', async () => {
     downloadBytes(await doc.save(), `${wmName}-catpdf.pdf`);
     toast(t('toast.watermarked'), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.wm'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.wm'); }
 });
 
 let toimgFile = null, toimgPdfJs = null;
 function renderToimgInfo() {
   if (!toimgFile) { $('#toimgInfo').innerHTML = ''; return; }
   const pagesLabel = toimgPdfJs ? `${toimgPdfJs.numPages} ${t('unit.pages')} · ${fmtSize(toimgFile.size)}` : fmtSize(toimgFile.size);
-  $('#toimgInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${toimgFile.name}</span><span class="pages">${pagesLabel}</span></div>`;
+  $('#toimgInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(toimgFile.name)}</span><span class="pages">${pagesLabel}</span></div>`;
 }
 wireDrop($('#dropToimg'), $('#fileToimg'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#toimgForm').style.display = 'none';
   try {
     toimgFile = f;
+    if (toimgPdfJs) await toimgPdfJs.destroy();
+    toimgPdfJs = null;
     toimgPdfJs = await loadPdfJs(await f.arrayBuffer());
     renderToimgInfo();
     $('#toimgForm').style.display = 'block';
@@ -840,14 +875,15 @@ $('#toimgFormat').dispatchEvent(new Event('change'));
 async function renderToBlob(pdf, pageNum, format, scale, quality) {
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale });
+  if (viewport.width * viewport.height > 16000000 || Math.max(viewport.width, viewport.height)>8192) throw new Error('Page too large; select lower resolution');
   const canvas = document.createElement('canvas');
   canvas.width = viewport.width; canvas.height = viewport.height;
   await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-  return await new Promise(r => canvas.toBlob(r, 'image/' + format, quality / 100));
+  try { const blob = await new Promise(r => canvas.toBlob(r, 'image/' + format, quality / 100)); if (!blob) throw new Error('Image export failed'); return blob; } finally { canvas.width = canvas.height = 0; page.cleanup(); }
 }
 $('#btnToimgZip').addEventListener('click', async () => {
   if (!toimgPdfJs) return toast(t('toast.needFile'), 'err');
-  const btn = $('#btnToimgZip'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnToimgZip'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const format = $('#toimgFormat').value;
     const scale = parseFloat($('#toimgScale').value);
@@ -863,13 +899,13 @@ $('#btnToimgZip').addEventListener('click', async () => {
     downloadBlob(zipBlob, `${baseName}-pages.zip`);
     toast(tf('toast.zipReady', { n: toimgPdfJs.numPages }), 'ok');
   } catch(e){ console.error(e); toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.toimg.zip'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.toimg.zip'); }
 });
 $('#btnToimgSingle').addEventListener('click', async () => {
   if (!toimgPdfJs) return toast(t('toast.needFile'), 'err');
   const n = parseInt($('#toimgPageNum').value, 10);
   if (!n || n < 1 || n > toimgPdfJs.numPages) return toast(t('toast.badPage'), 'err');
-  const btn = $('#btnToimgSingle'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnToimgSingle'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const format = $('#toimgFormat').value;
     const scale = parseFloat($('#toimgScale').value);
@@ -880,13 +916,13 @@ $('#btnToimgSingle').addEventListener('click', async () => {
     downloadBlob(blob, `${baseName}-page-${String(n).padStart(3,'0')}.${ext}`);
     toast(tf('toast.singlePage', { n }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.toimg.single'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.toimg.single'); }
 });
 
 let compressFile = null;
 function renderCompressInfo() {
   if (!compressFile) { $('#compressInfo').innerHTML = ''; return; }
-  $('#compressInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${compressFile.name}</span><span class="pages">${fmtSize(compressFile.size)}</span></div>`;
+  $('#compressInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(compressFile.name)}</span><span class="pages">${fmtSize(compressFile.size)}</span></div>`;
 }
 wireDrop($('#dropCompress'), $('#fileCompress'), async files => {
   const f = files[0];
@@ -898,24 +934,25 @@ wireDrop($('#dropCompress'), $('#fileCompress'), async files => {
 });
 $('#btnCompress').addEventListener('click', async () => {
   if (!compressFile) return toast(t('toast.needFile'), 'err');
-  const btn = $('#btnCompress'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnCompress'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const orig = compressFile.size;
-    const doc = await PDFLib.PDFDocument.load(await compressFile.arrayBuffer(), { ignoreEncryption:true });
+    const doc = await PDFLib.PDFDocument.load(await compressFile.arrayBuffer());
     doc.setTitle(''); doc.setAuthor(''); doc.setSubject('');
     doc.setKeywords([]); doc.setProducer('CatPDF'); doc.setCreator('CatPDF');
     const bytes = await doc.save({ useObjectStreams: true });
     const baseName = compressFile.name.replace(/\.pdf$/i, '');
+    if (bytes.byteLength >= orig) return toast(LANG === 'ms' ? 'Fail asal sudah lebih kecil. Tiada perubahan.' : 'Original is already smaller. No changes made.');
     downloadBytes(bytes, `${baseName}-compressed.pdf`);
     toast(tf('toast.compressed', { before: fmtSize(orig), after: fmtSize(bytes.byteLength) }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.compress'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.compress'); }
 });
 
 let textFile = null, textPdfJs = null, textExtracted = '';
 function renderTextInfo() {
   if (!textFile) { $('#textInfo').innerHTML = ''; return; }
-  $('#textInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${textFile.name}</span><span class="pages">${textPdfJs ? textPdfJs.numPages + ' ' + t('unit.pages') : fmtSize(textFile.size)}</span></div>`;
+  $('#textInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(textFile.name)}</span><span class="pages">${textPdfJs ? textPdfJs.numPages + ' ' + t('unit.pages') : fmtSize(textFile.size)}</span></div>`;
 }
 async function extractText(pdf) {
   let out = '';
@@ -930,8 +967,12 @@ async function extractText(pdf) {
 wireDrop($('#dropText'), $('#fileText'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#textForm').style.display = 'none';
+  textExtracted = '';
   try {
     textFile = f;
+    if (textPdfJs) await textPdfJs.destroy();
+    textPdfJs = null;
     textPdfJs = await loadPdfJs(await f.arrayBuffer());
     textExtracted = '';
     renderTextInfo();
@@ -956,13 +997,14 @@ $('#btnText').addEventListener('click', () => {
 let pagenumDoc = null, pagenumName = '';
 function renderPagenumInfo() {
   if (!pagenumDoc) { $('#pagenumInfo').innerHTML = ''; return; }
-  $('#pagenumInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${pagenumName}.pdf</span><span class="pages">${pagenumDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
+  $('#pagenumInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(pagenumName)}.pdf</span><span class="pages">${pagenumDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
 }
 wireDrop($('#dropPagenum'), $('#filePagenum'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#pagenumForm').style.display = 'none';
   try {
-    pagenumDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption:true });
+    pagenumDoc = await PDFLib.PDFDocument.load(await f.arrayBuffer());
     pagenumName = f.name.replace(/\.pdf$/i,'');
     renderPagenumInfo();
     $('#pagenumForm').style.display = 'block';
@@ -972,9 +1014,10 @@ wireDrop($('#dropPagenum'), $('#filePagenum'), async files => {
 $('#btnPagenum').addEventListener('click', async () => {
   if (!pagenumDoc) return toast(t('toast.needFile'), 'err');
   const pos = $('#pagenumPos').value;
-  const start = parseInt($('#pagenumStart').value, 10) || 1;
-  const size = parseInt($('#pagenumSize').value, 10) || 12;
-  const btn = $('#btnPagenum'); btn.disabled = true; btn.textContent = '⏳…';
+  const start = Number($('#pagenumStart').value);
+  const size = Number($('#pagenumSize').value);
+  if (!Number.isSafeInteger(start) || start < 1 || !Number.isInteger(size) || size < 6 || size > 48) return toast('Invalid page number settings.', 'err');
+  const btn = $('#btnPagenum'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const doc = await PDFLib.PDFDocument.load(await pagenumDoc.save());
     const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
@@ -999,20 +1042,23 @@ $('#btnPagenum').addEventListener('click', async () => {
     downloadBytes(await doc.save(), `${pagenumName}-numbered.pdf`);
     toast(t('toast.pagenumDone'), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.pagenum'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.pagenum'); }
 });
 
 let organizeDoc = null, organizeName = '', organizePdfJs = null;
 function renderOrganizeInfo() {
   if (!organizeDoc) { $('#organizeInfo').innerHTML = ''; return; }
-  $('#organizeInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${organizeName}.pdf</span><span class="pages">${organizeDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
+  $('#organizeInfo').innerHTML = `<div class="item"><span style="opacity:.7">📄</span><span class="name">${esc(organizeName)}.pdf</span><span class="pages">${organizeDoc.getPageCount()} ${t('unit.pages')}</span></div>`;
 }
 wireDrop($('#dropOrganize'), $('#fileOrganize'), async files => {
   const f = files[0];
   if (!f || !/\.pdf$/i.test(f.name)) return toast(t('toast.notpdf'), 'err');
+  $('#organizeForm').style.display = 'none';
   try {
     const buf = await f.arrayBuffer();
-    organizeDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption:true });
+    organizeDoc = await PDFLib.PDFDocument.load(buf.slice(0));
+    if (organizePdfJs) await organizePdfJs.destroy();
+    organizePdfJs = null;
     organizePdfJs = await loadPdfJs(buf);
     organizeName = f.name.replace(/\.pdf$/i,'');
     renderOrganizeInfo();
@@ -1025,7 +1071,7 @@ $('#btnOrganize').addEventListener('click', async () => {
   if (!organizeDoc) return toast(t('toast.needFile'), 'err');
   const order = [...document.querySelectorAll('#organizeGrid .thumb:not(.deleted)')].map(t => +t.dataset.page - 1);
   if (!order.length) return toast(t('toast.noPages'), 'err');
-  const btn = $('#btnOrganize'); btn.disabled = true; btn.textContent = '⏳…';
+  const btn = $('#btnOrganize'); btn.disabled = true; btn.closest('.panel').dataset.processing = 'true'; btn.textContent = '⏳…';
   try {
     const out = await PDFLib.PDFDocument.create();
     const pages = await out.copyPages(organizeDoc, order);
@@ -1033,7 +1079,7 @@ $('#btnOrganize').addEventListener('click', async () => {
     downloadBytes(await out.save(), `${organizeName}-organized.pdf`);
     toast(tf('toast.organizeDone', { n: order.length }), 'ok');
   } catch(e){ toast(t('toast.err'), 'err'); }
-  finally { btn.disabled = false; btn.textContent = t('btn.organize'); }
+  finally { delete btn.closest('.panel').dataset.processing; btn.disabled = false; btn.textContent = t('btn.organize'); }
 });
 
 let deferredPrompt = null;
@@ -1069,6 +1115,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('sw.js');
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        document.getElementById('updateBanner').classList.add('show');
+        document.getElementById('updateBtn').onclick = () => { navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), {once:true}); reg.waiting?.postMessage({type:'SKIP_WAITING'}); };
+      }
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         if (!newWorker) return;
@@ -1076,8 +1126,8 @@ if ('serviceWorker' in navigator) {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             document.getElementById('updateBanner').classList.add('show');
             document.getElementById('updateBtn').onclick = () => {
+              navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once:true });
               newWorker.postMessage({ type: 'SKIP_WAITING' });
-              setTimeout(() => window.location.reload(), 100);
             };
           }
         });
@@ -1089,7 +1139,7 @@ if ('serviceWorker' in navigator) {
 const params = new URLSearchParams(location.search);
 const toolParam = params.get('tool');
 if (toolParam) {
-  const card = document.querySelector(`.tool-card[data-tool="${toolParam}"]`);
+  const card = [...document.querySelectorAll('.tool-card')].find(c => c.dataset.tool === toolParam);
   if (card) setTimeout(() => card.click(), 100);
 }
 
