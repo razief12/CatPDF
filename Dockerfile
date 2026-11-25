@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libreoffice-wri
 WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ .
+COPY requirements.txt .
 RUN useradd -m catpdf
 USER catpdf
 EXPOSE 8000
