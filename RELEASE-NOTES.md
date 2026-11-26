@@ -1,2 +1,2 @@
-# CatPDF RC4.3 (4.5.6.4.3)
-Approximate Excel General display using original column width and font size, before pagination. Explicit formats and values unchanged. Cached formula values used to choose precision; uncached formulas retain General. Not exact Excel rendering.
+# RC5 Patch 8 frontend (4.5.6.5.15)
+Crop: shared targets use current margin snapshot; nonnegative margins and clearer scope controls. Root cause of reported multi-page failure not reproduced. Rotate: all, single, selected ranges, individual relative clockwise angles. No backend changes. Beta only.
