@@ -1,5 +1,5 @@
 from pathlib import Path
-import subprocess, zipfile, io, html, re, warnings, base64, math
+import os, subprocess, zipfile, io, html, re, warnings, base64, math, logging
 from copy import copy
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.pagebreak import Break
@@ -18,18 +18,52 @@ from pptx import Presentation
 from pptx.util import Inches as PI
 from weasyprint import HTML
 
-KINDS={'pdfdocx':'docx','pdfxlsx':'xlsx','pdfpptx':'pptx','pdfimg':'zip','pdftxt':'txt','pdfhtml':'html','pdfsemantic':'html','pdfmd':'md','docxpdf':'pdf','xlsxpdf':'pdf','pptxpdf':'pdf','imgpdf':'pdf','txtpdf':'pdf','htmlpdf':'pdf','jpgpng':'png','pngjpg':'jpg','webp':'webp'}
+from kinds import KINDS
 Image.MAX_IMAGE_PIXELS=20_000_000
 warnings.simplefilter("error", Image.DecompressionBombWarning)
 
 def no_fetch(url,*args,**kwargs):
+    # Inline data: URIs are self-contained (no network or file access) and must not be dropped,
+    # otherwise base64 images in user HTML (including CatPDF's own HTML exports) vanish silently.
+    if isinstance(url,str) and url[:5].lower()=='data:':
+        import urllib.parse
+        head,sep,payload=url[5:].partition(',')
+        if not sep: raise ValueError('Malformed data URI')
+        parts=head.split(';'); mime=parts[0] or 'text/plain'
+        if 'base64' in [p.lower() for p in parts[1:]]: data=base64.b64decode(urllib.parse.unquote_to_bytes(payload))
+        else: data=urllib.parse.unquote_to_bytes(payload)
+        return {'string':data,'mime_type':mime}
     raise ValueError('External resources disabled')
+
+RISKY_XLSX_PARTS=('xl/drawings/','xl/charts/','xl/pivotTables/','xl/pivotCache/','xl/slicers/','xl/slicerCaches/','xl/ctrlProps/','xl/activeX/','xl/embeddings/','xl/diagrams/','xl/threadedComments/')
+
+def xlsx_unsafe_for_roundtrip(src):
+    # openpyxl drops shapes, text boxes, pivots, slicers, form controls, sparklines and extension
+    # lists when it re-saves a workbook. If any are present, render the original untouched.
+    with zipfile.ZipFile(src) as z:
+        names=z.namelist()
+        hits=[n for n in names if n.startswith(RISKY_XLSX_PARTS)]
+        for n in names:
+            if re.fullmatch(r'xl/worksheets/sheet\d+\.xml',n) and b'x14:' in z.read(n): hits.append(n+' (x14 extensions)')
+    return hits
 
 def prepare_excel_layout(src):
     # Modify only the temporary upload, never the user's original workbook.
+    risky=xlsx_unsafe_for_roundtrip(src)
+    if risky:
+        logging.getLogger('uvicorn.error').warning('XLSX layout pre-processing skipped to avoid content loss: %s',risky[:5])
+        return
     wb = load_workbook(src)
     cached = load_workbook(src, data_only=True)
     try:
+        # Freeze formulas to the values the source file displays. openpyxl discards cached results on
+        # save, which would force a recalculation and could change what the source shows.
+        for ws in wb.worksheets:
+            for row in ws.iter_rows():
+                for cell in row:
+                    if cell.data_type=='f':
+                        cv=cached[ws.title][cell.coordinate].value
+                        if cv is not None: cell.value=cv
         # Approximate Excel General display before automatic column resizing.
         # Explicit number formats and underlying numeric values remain untouched.
         for ws in wb.worksheets:
@@ -154,6 +188,12 @@ def unique_svg(svg, page):
     svg=re.sub(r'(href="\#|url\(#)([^"\)]+)',lambda m:m[1]+prefix+m[2],svg)
     return svg
 
+def scanned(p):
+    return not p.get_text().strip() and bool(p.get_images())
+
+def ocr_page(p):
+    return '[Image-only page: text was NOT extracted (no OCR performed). Use the OCR Scanner tool.]'
+
 def convert(kind,src,out):
     if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out); return
     if kind in ('txtpdf','htmlpdf'):
@@ -178,9 +218,7 @@ def convert(kind,src,out):
     with fitz.open(src) as pdf:
         if pdf.needs_pass or not 1<=len(pdf)<=100: raise ValueError('Encrypted PDF or page limit exceeded (100)')
         if kind=='pdftxt':
-            pages=[p.get_text('text',sort=True) for p in pdf]
-            if any(not t.strip() and p.get_images() for p,t in zip(pdf,pages)):
-                raise ValueError('Image-only page detected; OCR required')
+            pages=[(ocr_page(p) or '[OCR: no readable text detected]') if scanned(p) else p.get_text('text',sort=True) for p in pdf]
             out.write_text('\n\f\n'.join(pages),encoding='utf-8'); return
         if kind=='pdfimg':
             with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as z:
@@ -198,12 +236,12 @@ def convert(kind,src,out):
                 w,h=p.rect.width,p.rect.height
                 parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style><section style="page:cat{i};width:{w}pt;height:{h}pt;break-after:page">'+unique_svg(p.get_svg_image(text_as_path=False),i)+'</section>')
             out.write_text('<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}svg{display:block;width:100%;height:100%}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
-        if any(not p.get_text().strip() and p.get_images() for p in pdf): raise ValueError('Image-only page detected; OCR required to avoid silent data loss')
-        if not any(p.get_text().strip() for p in pdf): raise ValueError('No selectable text; OCR required')
         if kind=='pdfsemantic':
             parts=[]
             for i,p in enumerate(pdf):
                 parts.append(f'<section><h2>Page {i+1}</h2>')
+                if scanned(p):
+                    parts.append('<p>'+html.escape(ocr_page(p) or '[No readable text detected]').replace('\n','<br>')+'</p>')
                 drawings=p.get_drawings()
                 spans=[sp for b in p.get_text('dict',flags=fitz.TEXTFLAGS_DICT & ~fitz.TEXT_PRESERVE_IMAGES)['blocks'] for l in b.get('lines',[]) for sp in l['spans']]
                 blocks=page_blocks(p)
@@ -237,13 +275,24 @@ def convert(kind,src,out):
         doc=Document() if kind=='pdfdocx' else None; wb=Workbook() if kind=='pdfxlsx' else None; md=[]
         if wb: wb.remove(wb.active)
         for i,p in enumerate(pdf):
-            blocks=page_blocks(p)
+            blocks=[] if scanned(p) else page_blocks(p)
             drawings=p.get_drawings(); allspans=[s for b in p.get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans'] if s['text'].strip()]
             if doc and i: doc.add_page_break()
             if doc and i==0:
                 sec=doc.sections[0]; sec.page_width=Pt(p.rect.width); sec.page_height=Pt(p.rect.height); sec.left_margin=sec.right_margin=Pt(24); sec.top_margin=sec.bottom_margin=Pt(24)
             if wb: ws=wb.create_sheet(f'Page {i+1}'); row=1
             md.append(f'## Page {i+1}')
+            if scanned(p):
+                text=ocr_page(p) or '[No readable text detected]'
+                if doc:
+                    doc.add_paragraph(text)
+                    scale=min(2,1800/max(p.rect.width,p.rect.height))
+                    doc.add_picture(io.BytesIO(p.get_pixmap(matrix=fitz.Matrix(scale,scale),alpha=False).tobytes('png')),width=Pt(min(400,doc.sections[0].page_width.pt-48)))
+                if wb:
+                    for line in (text).splitlines():
+                        ws.cell(row,1,line).data_type='s'; row+=1
+                md.append(text)
+                continue
             for _,__,typ,data in blocks:
                 if typ=='text':
                     if doc: doc.add_paragraph(data)
@@ -286,8 +335,8 @@ def convert(kind,src,out):
                         if wb:
                             c=ws.cell(row+ri,ci+1,v); c.data_type='s'; c.alignment=Alignment(wrap_text=True,vertical='top'); c.border=Border(**{s:Side(style='thin',color='BBBBBB') for s in ('left','right','top','bottom')}); c.font=Font(bold=bold,color=fg); c.fill=PatternFill('solid',fgColor=bg) if bg else PatternFill();
                             if ci>0 and re.fullmatch(r'RM\s*-?[\d,]+(?:\.\d+)?',v):
-                                c.value=float(v[2:].strip().replace(',','')); c.number_format='"RM" #,##0.00'
-                            if ci>0 and re.fullmatch(r'-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?',v) and len(v.replace(',','').replace('.','').replace('-',''))<=15:
+                                c.value=float(v[2:].strip().replace(',','')); c.number_format='"RM" #,##0'+('.'+'0'*len(v.rsplit('.',1)[1]) if '.' in v else '')  # keep the source's decimal places
+                            if ci>0 and re.fullmatch(r'-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?',v) and not re.match(r'-?0\d',v) and len(v.replace(',','').replace('.','').replace('-',''))<=15:
                                 header=(data[0][ci] or '').lower();
                                 if re.search(r'qty|quantity|rate|amount|times|weight|factor|\(m\)',header):
                                     c.value=float(v.replace(',','')) if '.' in v else int(v.replace(',','')); c.number_format='#,##0.'+'0'*len(v.rsplit('.',1)[1]) if '.' in v else '#,##0'
