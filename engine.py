@@ -1,5 +1,8 @@
 from pathlib import Path
-import subprocess, zipfile, io, html, re, warnings, base64
+import subprocess, zipfile, io, html, re, warnings, base64, math
+from copy import copy
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.pagebreak import Break
 import fitz
 from PIL import Image, ImageOps
 from docx import Document
@@ -22,7 +25,7 @@ warnings.simplefilter("error", Image.DecompressionBombWarning)
 def no_fetch(url,*args,**kwargs):
     raise ValueError('External resources disabled')
 
-def prepare_excel_layout(src):
+def prepare_excel_layout(src, smart_currency=False):
     # Modify only the temporary upload, never the user's original workbook.
     wb = load_workbook(src)
     try:
@@ -47,15 +50,51 @@ def prepare_excel_layout(src):
             elif not ws.page_setup.orientation:
                 ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT
             ws.col_breaks.brk = []
+            # Compact only automatically laid out sheets; keep explicit print settings.
+            header = next((r for r in range(1,min(ws.max_row,8)+1)
+                           if str(ws.cell(r,1).value).strip().lower() in ('item no.','bill item','no.','element type')),None)
+            if header:
+                labels=[str(ws.cell(header,c).value or '').lower() for c in range(1,ws.max_column+1)]
+                currency=[i+1 for i,v in enumerate(labels) if 'amount (rm)' in v or 'rate (rm)' in v]
+                for c in currency if smart_currency else []:
+                    for r in range(header+1,ws.max_row+1):
+                        cell=ws.cell(r,c)
+                        if cell.number_format=='General' and (cell.data_type=='f' or isinstance(cell.value,(int,float))):
+                            cell.number_format='#,##0.00'
+                if ws.max_column>=6 or currency:
+                    # Wrap text instead of shrinking an excessively wide table.
+                    for c,label in enumerate(labels,1):
+                        width=(55 if currency else 29) if any(x in label for x in ('description','remarks','location','reinforcement','dimensions')) else 10 if 'item' in label or label=='no.' else 16 if currency else 12
+                        dim=ws.column_dimensions[get_column_letter(c)]; dim.min=dim.max=c; dim.width=width
+                    for row in ws.iter_rows(min_row=header):
+                        lines=1
+                        for cell in row:
+                            if cell.value is None or cell.__class__.__name__=='MergedCell': continue
+                            if any(m.min_row<=cell.row<=m.max_row and m.min_col<=cell.column<=m.max_col for m in ws.merged_cells.ranges): continue
+                            a=copy(cell.alignment); a.wrap_text=True; cell.alignment=a
+                            if isinstance(cell.value,str) and cell.data_type!='f':
+                                width=ws.column_dimensions[get_column_letter(cell.column)].width
+                                lines=max(lines,math.ceil(len(cell.value)/max(1,width-3)))
+                        ws.row_dimensions[row[0].row].height=max(ws.row_dimensions[row[0].row].height or 15,lines*14+4)
+                    ws.print_title_rows=f'{header}:{header}'
+                summary=next((r for r in range(header+1,ws.max_row+1) if str(ws.cell(r,1).value or '').upper().startswith('GRAND SUMMARY')),None)
+                if summary and ws.max_row-summary<=15:
+                    # Fixed scaling lets Calc honor manual page breaks.
+                    widths=sum(next((d.width for d in ws.column_dimensions.values() if d.min and d.min<=c<=d.max),13) for c in range(1,ws.max_column+1))
+                    ws.sheet_properties.pageSetUpPr.fitToPage=False
+                    ws.page_setup.fitToWidth=None; ws.page_setup.fitToHeight=None
+                    ws.page_setup.scale=max(10,min(100,int(100* (841.89-72)/(widths*7.5))))
+                    ws.row_breaks.append(Break(id=summary-1))
+
         wb.save(src)
     finally:
         wb.close()
 
-def office(src,out):
+def office(src,out,smart_currency=False):
     with zipfile.ZipFile(src) as z:
         if len(z.infolist())>5000 or sum(i.file_size for i in z.infolist())>150_000_000: raise ValueError('Office archive too large')
         if any('vbaProject' in i.filename or 'externalLinks/' in i.filename for i in z.infolist()): raise ValueError('Macros and external workbook links are not supported')
-    if src.suffix.lower() == '.xlsx': prepare_excel_layout(src)
+    if src.suffix.lower() == '.xlsx': prepare_excel_layout(src,smart_currency)
     p=subprocess.run(['libreoffice','-env:UserInstallation='+ (out.parent/'profile').as_uri(),'--headless','--convert-to','pdf','--outdir',str(out.parent),str(src)],capture_output=True,timeout=90)
     generated=src.with_suffix('.pdf')
     if p.returncode or not generated.exists(): raise ValueError('Office rendering failed')
@@ -107,8 +146,8 @@ def unique_svg(svg, page):
     svg=re.sub(r'(href="\#|url\(#)([^"\)]+)',lambda m:m[1]+prefix+m[2],svg)
     return svg
 
-def convert(kind,src,out):
-    if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out); return
+def convert(kind,src,out,smart_currency=False):
+    if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out,smart_currency); return
     if kind in ('txtpdf','htmlpdf'):
         text=src.read_text(encoding='utf-8-sig');
         if kind=='txtpdf': text='<meta charset=utf-8><pre style="white-space:pre-wrap;overflow-wrap:anywhere">'+html.escape(text)+'</pre>'
