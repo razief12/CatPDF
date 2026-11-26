@@ -1,5 +1,5 @@
 from pathlib import Path
-import subprocess, zipfile, io, html, re, warnings
+import subprocess, zipfile, io, html, re, warnings, base64
 import fitz
 from PIL import Image, ImageOps
 from docx import Document
@@ -83,7 +83,7 @@ def cell_style(page,rect,drawings,allspans):
     if not rect: return None,'000000',False
     r=fitz.Rect(rect); pt=fitz.Point((r.x0+r.x1)/2,(r.y0+r.y1)/2); bg=None
     for d in drawings:
-        if d.get('fill') and d['rect'].contains(pt):
+        if d.get('fill') is not None and d.get('fill_opacity',1) >= .95 and r.get_area()>0 and any(item[0]=='re' and (fitz.Rect(item[1]) & r).get_area() >= .85*r.get_area() for item in d['items']):
             bg=''.join(f'{round(c*255):02X}' for c in d['fill'][:3])
     spans=[s for s in allspans if r.contains(fitz.Point((s['bbox'][0]+s['bbox'][2])/2,(s['bbox'][1]+s['bbox'][3])/2))]
     s=max(spans,key=lambda x:len(x['text']),default={})
@@ -157,18 +157,30 @@ def convert(kind,src,out):
             parts=[]
             for i,p in enumerate(pdf):
                 parts.append(f'<section><h2>Page {i+1}</h2>')
-                for _,__,typ,data in page_blocks(p):
+                drawings=p.get_drawings()
+                spans=[sp for b in p.get_text('dict',flags=fitz.TEXTFLAGS_DICT & ~fitz.TEXT_PRESERVE_IMAGES)['blocks'] for l in b.get('lines',[]) for sp in l['spans']]
+                blocks=page_blocks(p)
+                for b in p.get_text('dict')['blocks']:
+                    if b['type']==1:
+                        blocks.append((b['bbox'][1],b['bbox'][0],'image',b))
+                for _,__,typ,data in sorted(blocks,key=lambda b:(b[0],b[1])):
+                    if typ=='image':
+                        with Image.open(io.BytesIO(data['image'])) as im:
+                            buf=io.BytesIO(); im.convert('RGBA').save(buf,format='PNG')
+                        encoded=base64.b64encode(buf.getvalue()).decode('ascii')
+                        width=data['bbox'][2]-data['bbox'][0]
+                        parts.append(f'<figure><img alt="Embedded PDF image" style="max-width:100%;height:auto;width:{width}pt" src="data:image/png;base64,{encoded}"></figure>')
+                        continue
                     if typ=='text':
                         parts.append('<p>'+html.escape(data).replace('\n','<br>')+'</p>'); continue
                     parts.append('<table><tbody>')
                     for ri,row in enumerate(data.extract()):
                         tag='th' if ri==0 else 'td'
                         cells=[]
-                        drawings=p.get_drawings()
-                        spans=[sp for b in p.get_text('dict')['blocks'] for l in b.get('lines',[]) for sp in l['spans']]
                         for ci,v in enumerate(row):
                             rect=data.rows[ri].cells[ci]
                             bg,fg,bold=cell_style(p,rect,drawings,spans)
+                            if bg==fg: fg='FFFFFF' if bg=='000000' else '000000'
                             style=f'color:#{fg};'+(f'background-color:#{bg};' if bg else '')+('font-weight:bold;' if bold else '')
                             cells.append(f'<{tag} style="{style}">'+html.escape(clean_cell(v or '')).replace('\n','<br>')+f'</{tag}>')
                         parts.append('<tr>'+''.join(cells)+'</tr>')

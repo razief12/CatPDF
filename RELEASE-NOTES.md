@@ -1,2 +1,6 @@
-# CatPDF v4.5.6 RC2 candidate (4.5.6.2)
-PDF to HTML: retain direct SVG export, allow image-only PDFs in visual mode, preserve detected cell colours and bold text in editable mode. Require matching backend version for HTML conversion; disable approximate offline HTML export. Update service worker cache version. Local BQ test: 7 SVG pages or 7 HTML tables, no missing character or decimal occurrences by multiset comparison, grand total retained, zero duplicate IDs. This does not establish exact reading order or visual fidelity. Earlier failed HTML outputs match a previously truncated portrait PDF in page-level content counts; actual upload provenance is unconfirmed. Excel and Word pagination remain open; no speculative blank-page removal. Browser and Render deployment untested.
+# CatPDF 4.5.6 RC3 (4.5.6.3)
+- Restrict detected cell fills to opaque rectangles covering at least 85% of a cell.
+- Editable HTML exports embedded raster images as inline PNG figures in approximate reading order.
+- Avoid identical foreground/background colors in editable tables.
+- Cache and backend version updated.
+- Excel/Word pagination and SVG numeric verification remain pending. Browser deployment not tested.
