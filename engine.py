@@ -25,18 +25,13 @@ warnings.simplefilter("error", Image.DecompressionBombWarning)
 def no_fetch(url,*args,**kwargs):
     raise ValueError('External resources disabled')
 
-def prepare_excel_layout(src, smart_currency=False):
+def prepare_excel_layout(src):
     # Modify only the temporary upload, never the user's original workbook.
     wb = load_workbook(src)
     try:
         for ws in wb.worksheets:
             if ws.sheet_state != 'visible':
                 continue
-            for row in ws.iter_rows():
-                for cell in row:
-                    # Quote literal RM for Calc compatibility; leave other formats intact.
-                    if cell.number_format.startswith("RM "):
-                        cell.number_format = '"RM" ' + cell.number_format[3:]
             if ws.page_setup.orientation or ws.page_setup.scale or ws.page_setup.fitToWidth is not None:
                 continue
             ws.sheet_properties.pageSetUpPr.fitToPage = True
@@ -55,16 +50,10 @@ def prepare_excel_layout(src, smart_currency=False):
                            if str(ws.cell(r,1).value).strip().lower() in ('item no.','bill item','no.','element type')),None)
             if header:
                 labels=[str(ws.cell(header,c).value or '').lower() for c in range(1,ws.max_column+1)]
-                currency=[i+1 for i,v in enumerate(labels) if 'amount (rm)' in v or 'rate (rm)' in v]
-                for c in currency if smart_currency else []:
-                    for r in range(header+1,ws.max_row+1):
-                        cell=ws.cell(r,c)
-                        if cell.number_format=='General' and (cell.data_type=='f' or isinstance(cell.value,(int,float))):
-                            cell.number_format='#,##0.00'
-                if ws.max_column>=6 or currency:
+                if ws.max_column>=6:
                     # Wrap text instead of shrinking an excessively wide table.
                     for c,label in enumerate(labels,1):
-                        width=(55 if currency else 29) if any(x in label for x in ('description','remarks','location','reinforcement','dimensions')) else 10 if 'item' in label or label=='no.' else 16 if currency else 12
+                        width=(55 if ws.max_column<=6 else 29) if any(x in label for x in ('description','remarks','location','reinforcement','dimensions')) else 10 if 'item' in label or label=='no.' else 16 if ws.max_column<=6 else 12
                         dim=ws.column_dimensions[get_column_letter(c)]; dim.min=dim.max=c; dim.width=width
                     for row in ws.iter_rows(min_row=header):
                         lines=1
@@ -90,11 +79,11 @@ def prepare_excel_layout(src, smart_currency=False):
     finally:
         wb.close()
 
-def office(src,out,smart_currency=False):
+def office(src,out):
     with zipfile.ZipFile(src) as z:
         if len(z.infolist())>5000 or sum(i.file_size for i in z.infolist())>150_000_000: raise ValueError('Office archive too large')
         if any('vbaProject' in i.filename or 'externalLinks/' in i.filename for i in z.infolist()): raise ValueError('Macros and external workbook links are not supported')
-    if src.suffix.lower() == '.xlsx': prepare_excel_layout(src,smart_currency)
+    if src.suffix.lower() == '.xlsx': prepare_excel_layout(src)
     p=subprocess.run(['libreoffice','-env:UserInstallation='+ (out.parent/'profile').as_uri(),'--headless','--convert-to','pdf','--outdir',str(out.parent),str(src)],capture_output=True,timeout=90)
     generated=src.with_suffix('.pdf')
     if p.returncode or not generated.exists(): raise ValueError('Office rendering failed')
@@ -146,8 +135,8 @@ def unique_svg(svg, page):
     svg=re.sub(r'(href="\#|url\(#)([^"\)]+)',lambda m:m[1]+prefix+m[2],svg)
     return svg
 
-def convert(kind,src,out,smart_currency=False):
-    if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out,smart_currency); return
+def convert(kind,src,out):
+    if kind in ('docxpdf','xlsxpdf','pptxpdf'): office(src,out); return
     if kind in ('txtpdf','htmlpdf'):
         text=src.read_text(encoding='utf-8-sig');
         if kind=='txtpdf': text='<meta charset=utf-8><pre style="white-space:pre-wrap;overflow-wrap:anywhere">'+html.escape(text)+'</pre>'
