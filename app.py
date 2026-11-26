@@ -9,7 +9,7 @@ app=FastAPI(title='CatPDF Conversion API')
 app.add_middleware(CORSMiddleware,allow_origins=os.getenv('CATPDF_ORIGINS','https://razief12.github.io,http://localhost:8000').split(','),allow_methods=['POST','GET'],allow_headers=['*'])
 slots=asyncio.Semaphore(1)
 @app.get('/health')
-def health(): return {'status':'ok','version':'4.5.6.1'}
+def health(): return {'status':'ok','version':'4.5.6.2'}
 @app.post('/convert/{kind}')
 async def run(kind:str,file:UploadFile=File(...)):
     if kind not in KINDS: raise HTTPException(404,'Unknown converter')

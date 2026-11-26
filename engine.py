@@ -144,6 +144,13 @@ def convert(kind,src,out):
             for p in pdf:
                 slide=deck.slides.add_slide(deck.slide_layouts[6]); r=p.rect; k=min(deck.slide_width/r.width,deck.slide_height/r.height); w=int(r.width*k); h=int(r.height*k); slide.shapes.add_picture(io.BytesIO(p.get_pixmap(matrix=fitz.Matrix(min(2, 2200/max(p.rect.width,p.rect.height)),min(2, 2200/max(p.rect.width,p.rect.height))),alpha=False).tobytes('png')),int((deck.slide_width-w)/2),int((deck.slide_height-h)/2),width=w,height=h)
             deck.save(out); return
+        if kind=='pdfhtml':
+            parts=[]
+            for i,p in enumerate(pdf):
+                # SVG preserves vector artwork, backgrounds and text positioning.
+                w,h=p.rect.width,p.rect.height
+                parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style><section style="page:cat{i};width:{w}pt;height:{h}pt;break-after:page">'+unique_svg(p.get_svg_image(text_as_path=False),i)+'</section>')
+            out.write_text('<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}svg{display:block;width:100%;height:100%}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
         if any(not p.get_text().strip() and p.get_images() for p in pdf): raise ValueError('Image-only page detected; OCR required to avoid silent data loss')
         if not any(p.get_text().strip() for p in pdf): raise ValueError('No selectable text; OCR required')
         if kind=='pdfsemantic':
@@ -156,17 +163,18 @@ def convert(kind,src,out):
                     parts.append('<table><tbody>')
                     for ri,row in enumerate(data.extract()):
                         tag='th' if ri==0 else 'td'
-                        parts.append('<tr>'+''.join(f'<{tag}>'+html.escape(clean_cell(v or '')).replace('\n','<br>')+f'</{tag}>' for v in row)+'</tr>')
+                        cells=[]
+                        drawings=p.get_drawings()
+                        spans=[sp for b in p.get_text('dict')['blocks'] for l in b.get('lines',[]) for sp in l['spans']]
+                        for ci,v in enumerate(row):
+                            rect=data.rows[ri].cells[ci]
+                            bg,fg,bold=cell_style(p,rect,drawings,spans)
+                            style=f'color:#{fg};'+(f'background-color:#{bg};' if bg else '')+('font-weight:bold;' if bold else '')
+                            cells.append(f'<{tag} style="{style}">'+html.escape(clean_cell(v or '')).replace('\n','<br>')+f'</{tag}>')
+                        parts.append('<tr>'+''.join(cells)+'</tr>')
                     parts.append('</tbody></table>')
                 parts.append('</section>')
             out.write_text('<!doctype html><html><head><meta charset="utf-8"><title>Editable PDF export</title><style>body{font:14px sans-serif;margin:24px}table{border-collapse:collapse;margin:12px 0;max-width:100%}td,th{border:1px solid #aaa;padding:5px;text-align:left}th{background:#e6edf7}section{break-after:page}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
-        if kind=='pdfhtml':
-            parts=[]
-            for i,p in enumerate(pdf):
-                # SVG preserves vector artwork, backgrounds and text positioning.
-                w,h=p.rect.width,p.rect.height
-                parts.append(f'<style>@page cat{i}{{size:{w}pt {h}pt;margin:0}}</style><section style="page:cat{i};width:{w}pt;height:{h}pt;break-after:page">'+unique_svg(p.get_svg_image(text_as_path=False),i)+'</section>')
-            out.write_text('<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}svg{display:block;width:100%;height:100%}section:last-child{break-after:auto}</style></head><body>'+''.join(parts)+'</body></html>',encoding='utf-8'); return
         doc=Document() if kind=='pdfdocx' else None; wb=Workbook() if kind=='pdfxlsx' else None; md=[]
         if wb: wb.remove(wb.active)
         for i,p in enumerate(pdf):
