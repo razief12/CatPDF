@@ -1,3 +1,2 @@
-JavaScript syntax: PASS (node --check, inline scripts and changed JS).
-Browser interaction and PDF output: NOT TESTED.
-Crop multi-page failure: reported by user, root cause not independently reproduced.
+JavaScript syntax: PASS
+Browser interaction and PDF output: not tested.
