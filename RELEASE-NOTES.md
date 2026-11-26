@@ -1,2 +1,2 @@
-# CatPDF v4.5.6 RC4.2 (4.5.6.4.2)
-Removed RM-specific formatting and checkbox; preserve source cell number formats. Automatic layout retained for worksheets without explicit orientation/scale/fit width. Word conversion unchanged from RC4.1.
+# CatPDF RC4.3 (4.5.6.4.3)
+Approximate Excel General display using original column width and font size, before pagination. Explicit formats and values unchanged. Cached formula values used to choose precision; uncached formulas retain General. Not exact Excel rendering.

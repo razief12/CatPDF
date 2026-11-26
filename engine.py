@@ -28,7 +28,25 @@ def no_fetch(url,*args,**kwargs):
 def prepare_excel_layout(src):
     # Modify only the temporary upload, never the user's original workbook.
     wb = load_workbook(src)
+    cached = load_workbook(src, data_only=True)
     try:
+        # Approximate Excel General display before automatic column resizing.
+        # Explicit number formats and underlying numeric values remain untouched.
+        for ws in wb.worksheets:
+            if ws.sheet_state != 'visible': continue
+            for row in ws.iter_rows():
+                for cell in row:
+                    if cell.number_format != 'General': continue
+                    value = cached[ws.title][cell.coordinate].value if cell.data_type == 'f' else cell.value
+                    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value): continue
+                    if value == int(value) or abs(value) < 0.0001 or abs(value) >= 1e11: continue
+                    width = next((d.width for d in ws.column_dimensions.values() if d.min and d.min <= cell.column <= d.max), ws.sheet_format.defaultColWidth or 8.43)
+                    budget = min(11, max(1, int(width * 11 / (cell.font.sz or 11))))
+                    integer_digits = len(str(int(abs(value)))) + (value < 0)
+                    decimals = budget - integer_digits - 1
+                    if decimals > 0 and round(value, decimals) != 0:
+                        cell.number_format = '0.' + '#' * decimals
+
         for ws in wb.worksheets:
             if ws.sheet_state != 'visible':
                 continue
@@ -78,6 +96,7 @@ def prepare_excel_layout(src):
         wb.save(src)
     finally:
         wb.close()
+        cached.close()
 
 def office(src,out):
     with zipfile.ZipFile(src) as z:

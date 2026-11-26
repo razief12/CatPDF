@@ -1,1 +1,1 @@
-RC4.2 local tests: Python and JS syntax passed. Excel v4: 9 pages, 867 populated cells unchanged (values/formulas and number formats), minimum extracted font 8.206 pt. Excel v5: 9 pages, 789 populated cells unchanged, minimum 7.905 pt. Word: 7 pages. Browser/Render/full regression not tested.
+Local LibreOffice: BQ v4 9 pages, grand total 698355.6245. Explicit format and numeric value checks passed. Python and JS syntax passed. Deployment and full regression not tested.
